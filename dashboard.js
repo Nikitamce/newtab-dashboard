@@ -49,6 +49,13 @@ if (USE_SYNC) {
     if (changes.gd_feeds)    { feeds    = changes.gd_feeds.newValue;    renderFeedTabs(); renderFeedModal(); }
     if (changes.gd_note && document.getElementById('notepad')) document.getElementById('notepad').value = changes.gd_note.newValue||'';
     if (changes.gd_wall)     applyWallSettings(changes.gd_wall.newValue);
+    if (changes.gd_markets)  { markets  = changes.gd_markets.newValue;  renderMarketModal(); loadMarkets(); }
+    if (changes.gd_channels) { channels = changes.gd_channels.newValue; renderVideoChannelModal(); loadVideos(); }
+    if (changes.gd_engine)   applyEngine(changes.gd_engine.newValue);
+    if (changes.gd_lang)     applyLang(changes.gd_lang.newValue);
+    if (changes.gd_theme)    applyTheme(changes.gd_theme.newValue);
+    if (changes.gd_fontsize) applyFontSize(changes.gd_fontsize.newValue);
+    if (changes.gd_uptime)   { uptimeConfig = changes.gd_uptime.newValue; loadUptime(); }
     showSyncBadge('synced');
   });
 }
@@ -146,9 +153,11 @@ async function saveFeeds() {
   await Store.set('gd_feeds', feeds);
 }
 async function saveMarkets() {
+  showSyncBadge('syncing');
   await Store.set('gd_markets', markets);
 }
 async function saveChannels() {
+  showSyncBadge('syncing');
   await Store.set('gd_channels', channels);
 }
 async function saveWall() {
