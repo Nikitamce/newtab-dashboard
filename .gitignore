@@ -1,0 +1,18 @@
+# Claude Code — configuración local de usuario
+.claude/settings.local.json
+
+# Paquete de extensión generado
+*.xpi
+*.zip
+
+# macOS
+.DS_Store
+
+# Windows
+Thumbs.db
+desktop.ini
+
+# Editores
+.vscode/
+.idea/
+*.swp
