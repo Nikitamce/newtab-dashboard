@@ -1,3 +1,5 @@
+[🇬🇧 English version](README.en.md)
+
 # My Dashboard — Nueva pestaña para Firefox
 
 **My Dashboard** reemplaza la nueva pestaña de Firefox con un dashboard personal, minimalista y completamente configurable. Todo desde el navegador, sin servidores, sin cuentas, sin API keys.
