@@ -51,10 +51,10 @@ if (USE_SYNC) {
     if (changes.gd_wall)     applyWallSettings(changes.gd_wall.newValue);
     if (changes.gd_markets)  { markets  = changes.gd_markets.newValue;  renderMarketModal(); loadMarkets(); }
     if (changes.gd_channels) { channels = changes.gd_channels.newValue; renderVideoChannelModal(); loadVideos(); }
-    if (changes.gd_engine)   applyEngine(changes.gd_engine.newValue);
-    if (changes.gd_lang)     applyLang(changes.gd_lang.newValue);
-    if (changes.gd_theme)    applyTheme(changes.gd_theme.newValue);
-    if (changes.gd_fontsize) applyFontSize(changes.gd_fontsize.newValue);
+    if (changes.gd_engine)   applyEngine(changes.gd_engine.newValue, false);
+    if (changes.gd_lang)     applyLang(changes.gd_lang.newValue, false);
+    if (changes.gd_theme)    applyTheme(changes.gd_theme.newValue, false);
+    if (changes.gd_fontsize) applyFontSize(changes.gd_fontsize.newValue, false);
     if (changes.gd_uptime)   { uptimeConfig = changes.gd_uptime.newValue; loadUptime(); }
     showSyncBadge('synced');
   });
@@ -490,10 +490,10 @@ const LANGUAGES = {
 let currentLang = 'es';
 let t = LANGUAGES.es; // active translations shortcut
 
-function applyLang(langCode) {
+function applyLang(langCode, save=true) {
   currentLang = langCode;
   t = LANGUAGES[langCode] || LANGUAGES.es;
-  Store.set('gd_lang', langCode);
+  if (save) Store.set('gd_lang', langCode);
 
   // Update all data-i18n elements
   document.querySelectorAll('[data-i18n]').forEach(el => {
@@ -594,12 +594,12 @@ document.getElementById('searchInput').addEventListener('keydown', e => {
     : activeEngine.url + encodeURIComponent(v);
 });
 
-function applyEngine(engineId) {
+function applyEngine(engineId, save=true) {
   const eng = SEARCH_ENGINES.find(e => e.id === engineId) || SEARCH_ENGINES[0];
   activeEngine = eng;
   const input = document.getElementById('searchInput');
   if (input) input.placeholder = t.searchWith + ' ' + eng.name + ' ' + t.searchOrUrl;
-  Store.set('gd_engine', engineId);
+  if (save) Store.set('gd_engine', engineId);
 }
 
 // ════════════════════════════════════════════════
@@ -1827,12 +1827,12 @@ function renderEngineModal() {
 const FONT_SIZES = ['sm','md','lg','xl'];
 let currentFontSize = 'md';
 
-function applyFontSize(size) {
+function applyFontSize(size, save=true) {
   if (!FONT_SIZES.includes(size)) size = 'md';
   currentFontSize = size;
   FONT_SIZES.forEach(s => document.body.classList.remove('font-' + s));
   document.body.classList.add('font-' + size);
-  Store.set('gd_fontsize', size);
+  if (save) Store.set('gd_fontsize', size);
   // Update button states (works whenever modal is open)
   document.querySelectorAll('.font-size-btn').forEach(btn => {
     btn.classList.toggle('active', btn.dataset.size === size);
@@ -1853,12 +1853,11 @@ const THEMES = [
 
 let currentTheme = 'obsidian';
 
-function applyTheme(themeId) {
+function applyTheme(themeId, save=true) {
   currentTheme = themeId;
-  // Remove all theme classes
   THEMES.forEach(th => document.body.classList.remove('theme-' + th.id));
   document.body.classList.add('theme-' + themeId);
-  Store.set('gd_theme', themeId);
+  if (save) Store.set('gd_theme', themeId);
   if (typeof renderThemeModal === 'function') renderThemeModal();
 }
 
