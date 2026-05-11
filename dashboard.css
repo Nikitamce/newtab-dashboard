@@ -153,7 +153,7 @@ body.no-wall #wallDim  { background:#0a0a0c; }
 .feed-row:hover { opacity:0.65; }
 .row-num { font-family:var(--font-mono); font-size:9px; color:var(--text-dim); min-width:14px; padding-top:2px; }
 .row-body { flex:1; }
-.row-title { font-size:12px; line-height:1.4; }
+.row-title { font-size:11px; line-height:1.4; }
 .row-meta { font-size:9.5px; color:var(--text-muted); margin-top:1px; }
 .feed-empty { font-size:11px; color:var(--text-muted); padding:10px 0; }
 
@@ -723,20 +723,17 @@ body.font-md { font-size: 13px; }
 body.font-lg { font-size: 15px; }
 body.font-xl { font-size: 17px; }
 /* Scale key UI text elements via em so they respond to body font-size */
-body.font-sm .nav-item, body.font-sm .feed-row, body.font-sm .row-title,
-body.font-sm .link-row, body.font-sm .link-group-name, body.font-sm .section-label,
-body.font-sm .clock, body.font-sm .date-line, body.font-sm .s-ticker,
-body.font-sm .weather-temp, body.font-sm .wstat-v { font-size: 0.85em; }
+body.font-sm .nav-item, body.font-sm .link-row, body.font-sm .link-group-name,
+body.font-sm .section-label, body.font-sm .clock, body.font-sm .date-line,
+body.font-sm .s-ticker, body.font-sm .weather-temp, body.font-sm .wstat-v { font-size: 0.85em; }
 
-body.font-lg .nav-item, body.font-lg .feed-row, body.font-lg .row-title,
-body.font-lg .link-row, body.font-lg .link-group-name, body.font-lg .section-label,
-body.font-lg .clock, body.font-lg .date-line, body.font-lg .s-ticker,
-body.font-lg .weather-temp, body.font-lg .wstat-v { font-size: 1.15em; }
+body.font-lg .nav-item, body.font-lg .link-row, body.font-lg .link-group-name,
+body.font-lg .section-label, body.font-lg .clock, body.font-lg .date-line,
+body.font-lg .s-ticker, body.font-lg .weather-temp, body.font-lg .wstat-v { font-size: 1.15em; }
 
-body.font-xl .nav-item, body.font-xl .feed-row, body.font-xl .row-title,
-body.font-xl .link-row, body.font-xl .link-group-name, body.font-xl .section-label,
-body.font-xl .clock, body.font-xl .date-line, body.font-xl .s-ticker,
-body.font-xl .weather-temp, body.font-xl .wstat-v { font-size: 1.3em; }
+body.font-xl .nav-item, body.font-xl .link-row, body.font-xl .link-group-name,
+body.font-xl .section-label, body.font-xl .clock, body.font-xl .date-line,
+body.font-xl .s-ticker, body.font-xl .weather-temp, body.font-xl .wstat-v { font-size: 1.3em; }
 
 /* ══════════ MODAL ══════════ */
 .modal-overlay { display:none; position:fixed; inset:0; background:var(--modal-bg); backdrop-filter:blur(8px); -webkit-backdrop-filter:blur(8px); z-index:100; align-items:center; justify-content:center; }
