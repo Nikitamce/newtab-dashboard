@@ -1,93 +1,104 @@
-# Glance Dashboard — Extensión Firefox
+# My Dashboard — Nueva pestaña para Firefox
 
-Un dashboard minimalista para la nueva pestaña de Firefox, inspirado en [Glance](https://github.com/glanceapp/Glance), con tipografía estilo Apple (DM Sans + DM Serif Display + DM Mono).
+**My Dashboard** reemplaza la nueva pestaña de Firefox con un dashboard personal, minimalista y completamente configurable. Todo desde el navegador, sin servidores, sin cuentas, sin API keys.
+
+Disponible en la **Firefox Add-ons Store**:
+**https://addons.mozilla.org/es-ES/firefox/addon/newtab-dashboard/**
 
 ---
 
-## Archivos incluidos
+## Qué incluye
+
+El dashboard se divide en tres columnas:
+
+**Columna izquierda — Sidebar**
+- Reloj y fecha en tiempo real
+- Feeds RSS con tabs por fuente (Hacker News, The Verge, Ars Technica y cualquier otro feed)
+- Monitor de servicios via **Uptime Kuma** (estado global + grid de monitores)
+
+**Columna central — Main**
+- Barra de búsqueda con 8 motores configurables (Google, DuckDuckGo, Brave, Kagi, Perplexity…)
+- Links organizados en **Secciones → Grupos → Links** con iconos automáticos
+- Vídeos recientes de canales de YouTube (sin API key de Google)
+
+**Columna derecha — Panel**
+- Clima en tiempo real via Open-Meteo (sin API key)
+- Calendario mensual con navegación
+- Precios de criptomonedas en tiempo real via CoinGecko (sin API key)
+- Bloc de notas persistente
+
+---
+
+## Características principales
+
+- **Sin API keys** — Clima, crypto y vídeos de YouTube funcionan sin registro
+- **Firefox Sync** — La configuración se sincroniza entre dispositivos automáticamente
+- **Iconos automáticos** — Los links sugieren su icono desde Simple Icons al escribir el nombre
+- **Wallpaper personalizable** — URL de imagen o gradiente predefinido, con controles de opacidad, desenfoque, oscurecimiento y tono
+- **Import / Export** — Guarda y restaura toda tu configuración en un JSON
+- **Multiidioma** — Interfaz en Español e Inglés
+- **Sin dependencias** — Vanilla JS, sin frameworks ni bundler
+
+---
+
+## Instalación
+
+### Desde la store (recomendado)
+
+Instala directamente desde la Firefox Add-ons Store:
+https://addons.mozilla.org/es-ES/firefox/addon/newtab-dashboard/
+
+### Modo desarrollador (desde el código fuente)
+
+1. Clona o descarga este repositorio.
+2. Abre Firefox y ve a `about:debugging`.
+3. Haz clic en **"Este Firefox"** → **"Cargar complemento temporal..."**.
+4. Selecciona el archivo `manifest.json` de la carpeta del proyecto.
+
+> Las extensiones temporales se desactivan al cerrar Firefox. Para una instalación permanente usa la store.
+
+---
+
+## Archivos
 
 ```
-firefox-dashboard/
-├── manifest.json      ← configuración de la extensión
-├── dashboard.html     ← el dashboard completo (HTML + CSS + JS)
-├── icon.svg           ← icono de la extensión
+newtab-dashboard/
+├── manifest.json      — configuración de la extensión (Manifest v2)
+├── dashboard.html     — estructura del dashboard
+├── dashboard.css      — estilos (glassmorphism, variables CSS, wallpaper)
+├── dashboard.js       — toda la lógica (~2.300 líneas, Vanilla JS)
+├── background.js      — reservado para uso futuro
+├── icon.svg / icon48.png / icon128.png
 └── README.md
 ```
 
 ---
 
-## Instalación en Firefox (modo desarrollador)
-
-### Paso 1 — Preparar los archivos
-Descarga o copia los tres archivos en una carpeta local, p. ej. `~/glance-dashboard/`.
-
-### Paso 2 — Abrir el gestor de extensiones temporal
-1. Abre Firefox y ve a `about:debugging` en la barra de direcciones.
-2. Haz clic en **"Este Firefox"** (panel izquierdo).
-3. Pulsa **"Cargar complemento temporal..."**.
-4. Selecciona el archivo `manifest.json` dentro de tu carpeta.
-
-✅ La extensión se activa. Abre una nueva pestaña (`Ctrl+T`) para ver el dashboard.
-
-> **Nota:** Las extensiones temporales desaparecen al cerrar Firefox.  
-> Para tenerla siempre, sigue el paso de firma más abajo.
-
----
-
-## Instalación permanente (sin firma oficial)
-
-1. Ve a `about:config` en Firefox.
-2. Busca `xpinstall.signatures.required` y ponlo en **false**.
-3. Comprime la carpeta como `.zip`, renómbrala a `.xpi`.
-4. Arrastra el `.xpi` sobre Firefox → confirma la instalación.
-
----
-
-## Características
-
-| Widget | Descripción |
-|---|---|
-| **Reloj** | Hora en tiempo real con fecha |
-| **Búsqueda** | Escribe una URL o búsqueda Google y pulsa Enter |
-| **Hacker News** | Top stories via API de Algolia (actualizable) |
-| **Bookmarks** | Tus marcadores de Firefox (requiere permiso `bookmarks`) |
-| **Notas rápidas** | Persisten entre sesiones con `localStorage` |
-| **Mercados** | Datos de ejemplo (ver sección de personalización) |
-| **Clima** | Placeholder estático (ver sección de personalización) |
-
----
-
 ## Personalización
 
-Edita `dashboard.html` directamente:
+Toda la configuración se hace desde el botón **⚙** de la interfaz, sin tocar código:
 
-### Cambiar ciudad del clima
-Integra la API gratuita de [Open-Meteo](https://open-meteo.com/) (sin API key):
-```js
-const res = await fetch('https://api.open-meteo.com/v1/forecast?latitude=40.41&longitude=-3.70&current_weather=true');
-```
+- Añadir / reordenar / eliminar secciones, grupos y links
+- Gestionar feeds RSS (con presets populares)
+- Añadir activos de crypto (con presets)
+- Añadir canales de YouTube por Channel ID o @handle
+- Cambiar el motor de búsqueda
+- Aplicar wallpaper (URL o gradiente) y ajustar sus efectos
+- Cambiar el idioma
+- Exportar e importar la configuración completa
 
-### Actualizar cotizaciones reales
-Usa la API gratuita de [Frankfurter](https://www.frankfurter.app/) para divisas o
-[Yahoo Finance unofficial](https://query1.finance.yahoo.com/v8/finance/chart/AAPL) para acciones.
-
-### Cambiar fuentes
-Sustituye los `@import` de Google Fonts por cualquier otra combinación.
-Las variables CSS están en `:root` al inicio del `<style>`.
-
-### Añadir más feeds RSS
-Usa un proxy CORS como `https://api.rss2json.com/v1/api.json?rss_url=TU_RSS_URL` para cargar cualquier feed.
+Para cambiar la ciudad del clima, edita las coordenadas en `dashboard.js` (busca `open-meteo.com`).
 
 ---
 
-## Colores y tema
+## Tecnología
 
-Edita las variables CSS en `:root`:
-```css
---bg: #0d0d0d;         /* fondo principal */
---accent-warm: #c8b89a; /* color dorado de acento */
---green: #5a9a6a;       /* positivo en markets */
---red: #d16666;         /* negativo en markets */
-```
-
-Para cambiar a tema claro, invierte los valores de `--bg` y `--text-primary`.
+| Capa | Detalle |
+|---|---|
+| Almacenamiento | `browser.storage.sync` (Firefox Sync) con fallback a `localStorage` |
+| Clima | [Open-Meteo](https://open-meteo.com/) — gratuito, sin API key |
+| Crypto | [CoinGecko API](https://www.coingecko.com/en/api) — gratuito, sin API key |
+| YouTube | Feed Atom XML directo — sin Google API key |
+| RSS | Proxy CORS [rss2json](https://rss2json.com/) |
+| Iconos | [Simple Icons](https://simpleicons.org/) CDN + favicon como fallback |
+| Uptime | [Uptime Kuma](https://github.com/louislam/uptime-kuma) Status Page pública |
