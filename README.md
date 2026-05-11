@@ -7,6 +7,8 @@
 Disponible en la **Firefox Add-ons Store**:
 **https://addons.mozilla.org/es-ES/firefox/addon/newtab-dashboard/**
 
+![My Dashboard screenshot](images/screenshot1.png)
+
 ---
 
 ## Qué incluye
