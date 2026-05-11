@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dashboard</title>
+  <link rel="stylesheet" href="dashboard.css" />
+</head>
+<body class="no-wall">
+
+<!-- WALLPAPER -->
+<div id="wallLayer"><div id="wallImg"></div><div id="wallDim"></div></div>
+
+<!-- SETTINGS GEAR BUTTON -->
+<button id="gearBtn" data-i18n-title="settings">
+  <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><circle cx="12" cy="12" r="3"/></svg>
+</button>
+
+<!-- SHELL: sidebar | main | panel -->
+<div class="shell">
+
+  <!-- ── SIDEBAR ── -->
+  <aside class="sidebar">
+    <div class="sidebar-top">
+      <div class="clock-big" id="clock">00:00</div>
+      <div class="date-line">
+        <span id="dateDay"></span>
+        <span id="dateMonth"></span>
+      </div>
+      <div class="date-weekday" id="dateWeekday"></div>
+    </div>
+
+    <div id="syncBadge" class="sync-badge"></div>
+
+
+
+    <!-- Feeds in sidebar -->
+    <div class="sidebar-feeds">
+      <div class="sb-section-title">
+        <span id="feedSidebarTitle" data-i18n="news"></span>
+        <button class="sb-refresh" id="btnRefreshFeeds" data-i18n-title="refresh">↻</button>
+      </div>
+      <div class="feed-tab-bar" id="feedTabBar"></div>
+      <div id="feedContent" class="feed-content-sidebar">
+        <div class="feed-empty" data-i18n="feedEmpty"></div>
+      </div>
+    </div>
+
+    <!-- Uptime Kuma in sidebar -->
+    <div class="sidebar-uptime" id="uptimeSection" style="display:none">
+      <div class="sb-section-title">
+        <div class="uptime-header-left">
+          <span class="uptime-dot-global" id="uptimeGlobalDot"></span>
+          <span data-i18n="uptime"></span>
+          <span class="uptime-global-label" id="uptimeGlobalLabel"></span>
+        </div>
+        <div style="display:flex;gap:6px;align-items:center">
+          <button class="sb-refresh" id="btnRefreshUptime">↻</button>
+          <button class="sb-refresh" id="btnManageUptime" style="font-size:11px">⚙</button>
+        </div>
+      </div>
+      <div class="uptime-grid" id="uptimeGrid"></div>
+    </div>
+
+  </aside>
+
+  <!-- ── MAIN (links area) ── -->
+  <main class="main">
+    <div class="search-bar">
+      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+      <input id="searchInput" type="text" id="searchPlaceholder" placeholder="" autocomplete="off" />
+      <span class="search-kbd">↵</span>
+    </div>
+
+    <!-- Link sections rendered by JS -->
+    <div id="sectionsEl"></div>
+
+
+
+    <!-- Videos section -->
+    <div class="videos-section" id="videosSection" style="display:none">
+      <div class="videos-header">
+        <span class="section-label" style="border:none;padding:0;margin:0" data-i18n="videos">/span>
+        <div style="display:flex;gap:8px;align-items:center">
+          <button class="sb-refresh" id="btnRefreshVideos" title="Actualizar">↻</button>
+          <button class="sb-refresh" id="btnManageVideos" data-i18n-title="manageChannels" style="font-size:11px">⚙</button>
+        </div>
+      </div>
+      <div id="videosEl"></div>
+    </div>
+  </main>
+
+  <!-- ── RIGHT PANEL ── -->
+  <aside class="panel">
+    <div class="panel-clock">
+      <div class="panel-greeting" id="greetSub"></div>
+    </div>
+
+    <div>
+      <div class="sec-head"><span class="sec-title" data-i18n="weather"></span></div>
+      <div class="weather-card">
+        <div class="weather-temp">—<sup>°C</sup></div>
+        <div class="weather-desc" id="weatherDesc">Valencia, España</div>
+        <div class="weather-row">
+          <div class="wstat"><div class="wstat-l" data-i18n="wind"></div><div class="wstat-v" id="wWind">—</div></div>
+          <div class="wstat"><div class="wstat-l" data-i18n="humidity"></div><div class="wstat-v" id="wHum">—</div></div>
+          <div class="wstat"><div class="wstat-l" data-i18n="feelsLike"></div><div class="wstat-v" id="wFeel">—</div></div>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <div class="sec-head">
+        <span class="sec-title" data-i18n="calendar"></span>
+        <div style="display:flex;gap:10px;align-items:center">
+          <button class="sb-refresh" id="calPrev">‹</button>
+          <span id="calMonthLabel" style="font-size:10px;color:var(--text-secondary);font-family:var(--font-mono)"></span>
+          <button class="sb-refresh" id="calNext">›</button>
+        </div>
+      </div>
+      <div class="calendar" id="calGrid"></div>
+    </div>
+
+    <div>
+      <div class="sec-head">
+        <span class="sec-title" data-i18n="markets"></span>
+        <div style="display:flex;gap:8px;align-items:center">
+          <button class="sb-refresh" id="btnRefreshMarkets" data-i18n-title="refresh">↻</button>
+          <button class="sb-refresh" id="btnManageMarkets" data-i18n-title="manage" style="font-size:11px">⚙</button>
+        </div>
+      </div>
+      <div class="stock-list" id="marketsList">
+        <div class="feed-empty" data-i18n="loading"></div>
+      </div>
+    </div>
+
+    <div class="note-wrap">
+      <div class="sec-head"><span class="sec-title" data-i18n="quickNote"></span></div>
+      <textarea class="note-input" id="notepad" data-i18n-placeholder="writeSomething" placeholder=""></textarea>
+    </div>
+  </aside>
+</div>
+
+<!-- ══ MODAL ══ -->
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title" data-i18n="settings"></div>
+      <button class="modal-close" id="modalClose">×</button>
+    </div>
+    <div class="modal-tabs">
+      <div class="modal-tab active" data-tab="links" data-i18n="links"></div>
+      <div class="modal-tab" data-tab="feeds">Feeds RSS</div>
+      <div class="modal-tab" data-tab="markets">Markets</div>
+      <div class="modal-tab" data-tab="videos" data-i18n="videos"></div>
+      <div class="modal-tab" data-tab="engine" data-i18n="searchEngine"></div>
+      <div class="modal-tab" data-tab="appearance" data-i18n="appearance"></div>
+      <div class="modal-tab" data-tab="lang" data-i18n="language"></div>
+      <div class="modal-tab" data-tab="uptime" data-i18n="uptime"></div>
+    </div>
+    <div class="modal-body">
+
+      <!-- TAB LINKS -->
+      <div class="modal-panel active" id="tab-links">
+        <p class="hint-text" data-i18n-html="linksHint"></p>
+        <div class="item-list" id="sectionItemList"></div>
+        <div class="divider"></div>
+        <!-- Add section -->
+        <div class="add-form" id="addSectionForm">
+          <div class="add-form-title" data-i18n="newSection"></div>
+          <div class="field-row">
+            <div class="field" style="flex:1"><label data-i18n="sectionName"></label><input id="sName" type="text" data-i18n-placeholder="sectionPlaceholder" placeholder="" /></div>
+          </div>
+          <button class="btn btn-primary btn-sm align-start" id="btnAddSection" data-i18n="createSection"></button>
+        </div>
+        <!-- Add group inside section -->
+        <div class="add-form" id="addGroupForm" style="display:none">
+          <div class="add-form-title"><span data-i18n="newGroupIn"></span> <span id="addGroupSectionName" class="accent-warm"></span></div>
+          <div class="field"><label data-i18n="groupName"></label><input id="gName" type="text" data-i18n-placeholder="groupPlaceholder" placeholder="" /></div>
+          <div class="btn-row">
+            <button class="btn btn-primary btn-sm" id="btnAddGroup" data-i18n="createGroup"></button>
+            <button class="btn btn-ghost btn-sm" id="btnCancelGroup" data-i18n="cancel"></button>
+          </div>
+        </div>
+        <!-- Add link inside group -->
+        <div class="add-form" id="addLinkForm" style="display:none">
+          <div class="add-form-title">Nuevo link en: <span id="addLinkGroupName" class="accent-warm"></span></div>
+          <div class="field-row">
+            <div class="field"><label data-i18n="name"></label><input id="lName" type="text" placeholder="GitHub" /></div>
+            <div class="field"><label>URL</label><input id="lUrl" type="url" placeholder="https://github.com" /></div>
+          </div>
+          <!-- Icon picker -->
+          <div class="icon-picker-row">
+            <div class="icon-preview" id="iconPreview">
+              <img id="iconPreviewImg" src="" alt="" />
+              <span id="iconPreviewEmpty">?</span>
+            </div>
+            <div style="flex:1;min-width:0">
+              <div class="field">
+                <label data-i18n-html="iconLabel"></label>
+                <input id="lIcon" type="url" placeholder="https://cdn.simpleicons.org/github/ffffff" />
+              </div>
+            </div>
+          </div>
+          <div class="btn-row">
+            <button class="btn btn-primary btn-sm" id="btnAddLink" data-i18n="addLink"></button>
+            <button class="btn btn-ghost btn-sm" id="btnCloseAddLink" data-i18n="cancel"></button>
+          </div>
+        </div>
+        <!-- Edit link form -->
+        <div class="add-form" id="editLinkForm" style="display:none">
+          <div class="add-form-title"><span data-i18n="editLink"></span>: <span id="editLinkGroupName" class="accent-warm"></span></div>
+          <div class="field-row">
+            <div class="field"><label data-i18n="name"></label><input id="elName" type="text" /></div>
+            <div class="field"><label>URL</label><input id="elUrl" type="url" /></div>
+          </div>
+          <div class="icon-picker-row">
+            <div class="icon-preview" id="editIconPreview">
+              <img id="editIconPreviewImg" src="" alt="" />
+              <span id="editIconPreviewEmpty">?</span>
+            </div>
+            <div style="flex:1;min-width:0">
+              <div class="field">
+                <label data-i18n-html="iconLabel"></label>
+                <input id="elIcon" type="url" placeholder="https://cdn.simpleicons.org/github/ffffff" />
+              </div>
+            </div>
+          </div>
+          <div class="btn-row">
+            <button class="btn btn-primary btn-sm" id="btnSaveEditLink" data-i18n="save"></button>
+            <button class="btn btn-ghost btn-sm" id="btnCloseEditLink" data-i18n="cancel"></button>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB FEEDS -->
+      <div class="modal-panel" id="tab-feeds">
+        <div class="item-list" id="feedItemList"></div>
+        <div class="divider"></div>
+        <div class="add-form">
+          <div class="add-form-title" data-i18n="addFeed"></div>
+          <div class="field-row">
+            <div class="field" style="flex:1.4"><label data-i18n="name"></label><input id="fName" type="text" placeholder="Hacker News" /></div>
+            <div class="field" style="flex:0.6"><label data-i18n="items"></label><input id="fCount" type="number" value="8" min="3" max="30" /></div>
+          </div>
+          <div class="field"><label>URL RSS</label><input id="fUrl" type="url" placeholder="https://hnrss.org/frontpage" /></div>
+          <div class="btn-row">
+            <button class="btn btn-primary" id="btnAddFeed" data-i18n="add"></button>
+            <button class="btn btn-ghost" id="btnTogglePresets" data-i18n="popular"></button>
+          </div>
+        </div>
+        <div class="add-form" id="presetPanel" style="display:none">
+          <div class="add-form-title" data-i18n="clickToSelect"></div>
+          <div class="preset-grid" id="presetGrid"></div>
+        </div>
+      </div>
+
+      <!-- TAB MARKETS -->
+      <div class="modal-panel" id="tab-markets">
+        <p class="hint-text" data-i18n-html="marketsHint"></p>
+        <div class="item-list" id="marketItemList"></div>
+        <div class="divider"></div>
+        <div class="add-form">
+          <div class="add-form-title" data-i18n="addAsset"></div>
+          <div class="field-row">
+            <div class="field" style="flex:1.2">
+              <label>ID CoinGecko</label>
+              <input id="mCoinId" type="text" placeholder="bitcoin, ethereum, solana…" />
+            </div>
+            <div class="field" style="flex:0.8">
+              <label data-i18n="symbol"></label>
+              <input id="mSymbol" type="text" placeholder="BTC, ETH…" />
+            </div>
+          </div>
+          <div class="field">
+            <label data-i18n="displayName"></label>
+            <input id="mName" type="text" placeholder="Bitcoin" />
+          </div>
+          <div class="btn-row">
+            <button class="btn btn-primary btn-sm" id="btnAddMarket" data-i18n="add"></button>
+            <button class="btn btn-ghost btn-sm" id="btnMarketPresets" data-i18n="popular"></button>
+          </div>
+        </div>
+        <div class="add-form" id="marketPresetPanel" style="display:none">
+          <div class="add-form-title" data-i18n="clickToAdd"></div>
+          <div class="preset-grid" id="marketPresetGrid"></div>
+        </div>
+      </div>
+
+      <!-- TAB VÍDEOS -->
+      <div class="modal-panel" id="tab-videos">
+        <p class="hint-text" data-i18n-html="videosHint"></p>
+        <p class="hint-text" style="margin-top:-4px" data-i18n-html="videosHintHandle"></p>
+        <div class="item-list" id="videoChannelList"></div>
+        <div class="divider"></div>
+        <div class="add-form">
+          <div class="add-form-title" data-i18n="addChannel"></div>
+          <div class="field-row">
+            <div class="field" style="flex:1.4">
+              <label>Channel ID</label>
+              <input id="vChannelId" type="text" placeholder="@naseros o UCBcRF18a7Qf58cCRy5xuWwQ" />
+            </div>
+            <div class="field" style="flex:0.8">
+              <label data-i18n="name"></label>
+              <input id="vChannelName" type="text" placeholder="MiCanal" />
+            </div>
+          </div>
+          <div class="field">
+            <label data-i18n="videosToShow"></label>
+            <input id="vCount" type="number" value="5" min="1" max="15" style="width:80px" />
+          </div>
+          <div class="btn-row">
+            <button class="btn btn-primary btn-sm" id="btnAddChannel" data-i18n="addChannel"></button>
+          </div>
+        </div>
+        <p class="hint-text" style="margin-top:4px">💡 Tip: si el canal tiene URL con <em>@usuario</em>, busca el Channel ID en <a href="https://www.youtube.com/@usuario/about" target="_blank" style="color:var(--accent-warm)">su página About</a> → Compartir → Copiar ID del canal.</p>
+      </div>
+
+      <!-- TAB BUSCADOR -->
+      <div class="modal-panel" id="tab-engine">
+        <p class="hint-text" data-i18n="engineHint"></p>
+        <div class="item-list" id="engineList"></div>
+      </div>
+
+      <!-- TAB APARIENCIA (Tema + Fondo + Tipografía) -->
+      <div class="modal-panel" id="tab-appearance">
+
+        <!-- Themes -->
+        <div class="appearance-section-title" data-i18n="theme"></div>
+        <div class="item-list" id="themeList"></div>
+
+        <!-- Font size -->
+        <div class="appearance-section-title" data-i18n="fontSize"></div>
+        <div class="font-size-row">
+          <button class="font-size-btn" id="btnFontSm" data-size="sm">A<span>sm</span></button>
+          <button class="font-size-btn" id="btnFontMd" data-size="md">A<span>md</span></button>
+          <button class="font-size-btn" id="btnFontLg" data-size="lg">A<span>lg</span></button>
+          <button class="font-size-btn" id="btnFontXl" data-size="xl">A<span>xl</span></button>
+        </div>
+
+        <!-- Wallpaper -->
+        <div class="appearance-section-title" data-i18n="background"></div>
+        <div class="wall-preview-wrap">
+          <img id="wallPreviewImg" class="wall-preview-img" src="" alt="" />
+          <div class="wall-preview-overlay">
+            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.2"><path d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+            <span id="wallPreviewText" data-i18n="wallHint"></span>
+          </div>
+        </div>
+        <div class="url-row">
+          <div class="field url-field"><label data-i18n="imageUrl"></label><input id="wallUrlInput" type="url" placeholder="https://images.unsplash.com/photo-…" /></div>
+          <button class="btn btn-primary btn-sm" id="btnApplyWallUrl" data-i18n="apply"></button>
+        </div>
+        <p class="hint-text" data-i18n="wallUrlHint"></p>
+        <div>
+          <div class="add-form-title" style="margin-bottom:8px" data-i18n="presetGradients"></div>
+          <div class="wall-presets" id="wallPresets"></div>
+        </div>
+        <div class="wall-controls-grid">
+          <div class="wall-slider-row"><div class="wall-slider-label"><span data-i18n="opacity"></span> <span id="lblOpacity">100%</span></div><input class="wall-range" type="range" id="slOpacity" min="0" max="100" value="100" /></div>
+          <div class="wall-slider-row"><div class="wall-slider-label"><span data-i18n="darken"></span> <span id="lblDim">45%</span></div><input class="wall-range" type="range" id="slDim" min="0" max="85" value="45" /></div>
+          <div class="wall-slider-row"><div class="wall-slider-label"><span data-i18n="blur"></span> <span id="lblBlur">0px</span></div><input class="wall-range" type="range" id="slBlur" min="0" max="20" value="0" /></div>
+          <div class="wall-slider-row"><div class="wall-slider-label"><span data-i18n="tint"></span> <span id="lblTint">0°</span></div><input class="wall-range" type="range" id="slTint" min="0" max="360" value="0" /></div>
+        </div>
+        <div class="wall-slider-row"><div class="wall-slider-label"><span data-i18n="glass"></span> <span id="lblGlass">18px</span></div><input class="wall-range" type="range" id="slGlass" min="4" max="40" value="18" /></div>
+        <div class="btn-row">
+          <button class="btn btn-danger btn-sm" id="btnRemoveWall" data-i18n="removeBackground"></button>
+          <button class="btn btn-ghost btn-sm" id="btnResetWall" data-i18n="restore"></button>
+        </div>
+      </div>
+
+      <!-- TAB UPTIME KUMA -->
+      <div class="modal-panel" id="tab-uptime">
+        <p class="hint-text" data-i18n="uptimeHint"></p>
+        <div class="field-row">
+          <div class="field" style="flex:2">
+            <label data-i18n="uptimeUrl"></label>
+            <input id="ukUrl" type="url" placeholder="https://uptime.miservidor.com" />
+          </div>
+          <div class="field" style="flex:1">
+            <label>Slug</label>
+            <input id="ukSlug" type="text" placeholder="default" />
+          </div>
+        </div>
+        <div class="btn-row">
+          <button class="btn btn-primary btn-sm" id="btnSaveUptime" data-i18n="save"></button>
+          <button class="btn btn-danger btn-sm" id="btnRemoveUptime" data-i18n="remove"></button>
+        </div>
+        <div id="uptimeTestResult" class="hint-text" style="margin-top:4px"></div>
+      </div>
+
+      <!-- TAB IDIOMA -->
+      <div class="modal-panel" id="tab-lang">
+        <p class="hint-text" data-i18n="langHint"></p>
+        <div class="item-list" id="langList"></div>
+      </div>
+
+    </div>
+    <div class="modal-footer">
+      <div class="footer-left">
+        <button class="btn btn-ghost btn-sm" id="btnExport">
+          <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+          <span data-i18n="export"></span>
+        </button>
+        <button class="btn btn-ghost btn-sm" id="btnImport">
+          <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
+          <span data-i18n="import"></span>
+        </button>
+        <input type="file" id="importFileInput" accept=".json" style="display:none" />
+      </div>
+      <button class="btn btn-ghost" id="btnModalFooterClose" data-i18n="close"></button>
+    </div>
+  </div>
+</div>
+
+<script src="dashboard.js"></script>
+</body>
+</html>
