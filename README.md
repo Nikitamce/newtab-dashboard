@@ -1,8 +1,8 @@
 [🇬🇧 English version](README.en.md)
 
-# My Dashboard — Nueva pestaña para Firefox
+# NewTab Dashboard
 
-**My Dashboard** reemplaza la nueva pestaña de Firefox con un dashboard personal, minimalista y completamente configurable. Todo desde el navegador, sin servidores, sin cuentas, sin API keys.
+**NewTab Dashboard** reemplaza la nueva pestaña de Firefox con un dashboard personal, minimalista y completamente configurable. Todo desde el navegador, sin servidores, sin cuentas, sin API keys.
 
 Disponible en la **Firefox Add-ons Store**:
 **https://addons.mozilla.org/es-ES/firefox/addon/newtab-dashboard/**
@@ -73,6 +73,7 @@ newtab-dashboard/
 ├── dashboard.js       — toda la lógica (~2.300 líneas, Vanilla JS)
 ├── background.js      — reservado para uso futuro
 ├── icon.svg / icon48.png / icon128.png
+├── LICENSE            — licencia MIT
 └── README.md
 ```
 
@@ -90,6 +91,7 @@ Toda la configuración se hace desde el botón **⚙** de la interfaz, sin tocar
 - Aplicar wallpaper (URL o gradiente) y ajustar sus efectos
 - Cambiar el idioma
 - Exportar e importar la configuración completa
+- Consultar la información del proyecto, versión y licencia en la pestaña **Acerca de**
 
 Para cambiar la ciudad del clima, edita las coordenadas en `dashboard.js` (busca `open-meteo.com`).
 
@@ -106,3 +108,9 @@ Para cambiar la ciudad del clima, edita las coordenadas en `dashboard.js` (busca
 | RSS | Proxy CORS [rss2json](https://rss2json.com/) |
 | Iconos | [Simple Icons](https://simpleicons.org/) CDN + favicon como fallback |
 | Uptime | [Uptime Kuma](https://github.com/louislam/uptime-kuma) Status Page pública |
+
+---
+
+## Licencia
+
+[MIT](LICENSE) © Francisco Martínez — software libre y gratuito. Puedes usarlo, modificarlo y redistribuirlo sin restricciones, conservando el aviso de copyright.

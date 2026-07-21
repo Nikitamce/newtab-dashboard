@@ -284,6 +284,15 @@ const LANGUAGES = {
     uptimeDown:     'Incidente activo',
     uptimeError:    'Error al conectar',
     uptimeLoading:  'Conectando…',
+    // Tab Acerca de
+    about:            'Acerca de',
+    aboutTagline:     'Nueva pestaña minimalista para Firefox',
+    aboutProject:     'Proyecto',
+    aboutDeveloper:   'Desarrollador',
+    aboutVersionLabel:'Versión',
+    aboutLicense:     'Licencia',
+    aboutLicenseHint: 'Publicado bajo licencia MIT: software libre y gratuito. Puedes usarlo, modificarlo y redistribuirlo sin restricciones, conservando el aviso de copyright.',
+    aboutPrivacy:     'Toda tu configuración se guarda <strong>en tu propio navegador</strong> y se sincroniza con tu cuenta de Firefox. La extensión no recopila ni envía datos personales, y no necesita ninguna API key.',
     // Alerts & status
     noItems:          'Sin ítems.',
     noSections:       'Sin secciones aún.',
@@ -442,6 +451,15 @@ const LANGUAGES = {
     uptimeDown:     'Active incident',
     uptimeError:    'Connection error',
     uptimeLoading:  'Connecting…',
+    // Tab About
+    about:            'About',
+    aboutTagline:     'A minimal new tab for Firefox',
+    aboutProject:     'Project',
+    aboutDeveloper:   'Developer',
+    aboutVersionLabel:'Version',
+    aboutLicense:     'License',
+    aboutLicenseHint: 'Released under the MIT license: free and open source software. You may use, modify and redistribute it without restrictions, keeping the copyright notice.',
+    aboutPrivacy:     'All your settings are stored <strong>in your own browser</strong> and synced through your Firefox account. The extension does not collect or send any personal data, and needs no API keys.',
     // Alerts & status
     noItems:          'No items.',
     noSections:       'No sections yet.',
@@ -885,10 +903,10 @@ function switchTab(tab) {
   if (tab==='markets') renderMarketModal();
   if (tab==='engine')  renderEngineModal();
   if (tab==='lang')    renderLangModal();
-  if (tab==='theme')   renderThemeModal();
   if (tab==='uptime')  renderUptimeModal();
   if (tab==='videos')  renderVideoChannelModal();
-  if (tab==='wall')    { renderGradientPresets(); updateWallPreview(wallSettings.type==='image'?wallSettings.src:null); }
+  if (tab==='about')   renderAbout();
+  if (tab==='appearance') { renderThemeModal(); renderGradientPresets(); updateWallPreview(wallSettings.type==='image'?wallSettings.src:null); }
 }
 
 // ── Section / Group / Link modal ──
@@ -2168,6 +2186,29 @@ function updateEditIconPreview(url) {
 }
 
 // ════════════════════════════════════════════════
+//  ABOUT
+// ════════════════════════════════════════════════
+// Fallback only for when the page is opened outside the extension context
+// (e.g. dashboard.html served as a plain file). The real source of truth is manifest.json.
+const APP_VERSION_FALLBACK = '1.8.3';
+
+function getAppVersion() {
+  try {
+    const rt = (typeof browser!=='undefined' && browser.runtime) || (typeof chrome!=='undefined' && chrome.runtime);
+    if (rt && rt.getManifest) return rt.getManifest().version;
+  } catch(e) {}
+  return APP_VERSION_FALLBACK;
+}
+
+function renderAbout() {
+  const v = getAppVersion();
+  const badge = document.getElementById('aboutVersion');
+  if (badge) badge.textContent = 'v' + v;
+  const row = document.getElementById('aboutVersionRow');
+  if (row) row.textContent = v;
+}
+
+// ════════════════════════════════════════════════
 //  NOTES
 // ════════════════════════════════════════════════
 const notepad=document.getElementById('notepad');
@@ -2288,6 +2329,7 @@ async function init() {
   applyFontSize(savedFont);
   uptimeConfig = await Store.get('gd_uptime', { url: '', slug: 'default' });
   channels = await Store.get('gd_channels', DEFAULT_CHANNELS);
+  renderAbout();
   renderCalendar();
   renderSections();
   renderFeedTabs();
