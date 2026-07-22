@@ -62,8 +62,6 @@ if (USE_SYNC) {
 
 // ════════════════════════════════════════════════
 //  DATA MODEL
-//  sections: [ { id, name, groups: [ { id, name, links: [ { id, name, url } ] } ] } ]
-//  feeds:    [ { id, name, url, count } ]
 // ════════════════════════════════════════════════
 const DEFAULT_SECTIONS = [
   {
@@ -130,8 +128,8 @@ const MARKET_PRESETS = [
 
 const DEFAULT_CHANNELS = [];
 let channels  = DEFAULT_CHANNELS;
-let uptimeConfig = { url: '', slug: 'default' }; // Uptime Kuma
-let videoCache = {};   // channelId → [{title,link,thumb,age}]
+let uptimeConfig = { url: '', slug: 'default' };
+let videoCache = {};
 
 let markets   = DEFAULT_MARKETS;
 let sections  = DEFAULT_SECTIONS;
@@ -140,9 +138,8 @@ let wallSettings = { ...DEFAULT_WALL };
 let activeFeedId = null;
 let feedCache    = {};
 
-// pending add state
-let pendingSection = null; // section id waiting for a new group
-let pendingGroup   = null; // {sectionId, groupId} waiting for a new link
+let pendingSection = null;
+let pendingGroup   = null;
 
 async function save() {
   showSyncBadge('syncing');
@@ -166,354 +163,234 @@ async function saveWall() {
 
 
 // ════════════════════════════════════════════════
-//  i18n — Internationalization
+//  i18n — Internationalization (es / en / ru)
 // ════════════════════════════════════════════════
 const LANGUAGES = {
   es: {
-    // General
-    settings:       'Configuración',
-    close:          'Cerrar',
-    cancel:         'Cancelar',
-    add:            'Añadir',
-    apply:          'Aplicar',
-    restore:        'Restaurar',
-    refresh:        'Actualizar',
-    manage:         'Gestionar',
-    name:           'Nombre',
-    items:          'Ítems',
-    popular:        'Populares…',
-    clickToSelect:  'Clic para seleccionar',
-    clickToAdd:     'Clic para añadir',
-    loading:        'Cargando...',
-    symbol:         'Símbolo',
-    displayName:    'Nombre para mostrar',
-    export:         'Exportar',
-    import:         'Importar',
-    // Sidebar
-    news:           'Noticias',
-    feedEmpty:      'Añade un feed RSS desde Links.',
-    // Greetings
-    goodMorning:    'Buenos días',
-    goodAfternoon:  'Buenas tardes',
-    goodEvening:    'Buenas noches',
-    // Panel
-    weather:        'Clima',
-    wind:           'Viento',
-    humidity:       'Humedad',
-    feelsLike:      'Sensac.',
-    calendar:       'Calendario',
-    markets:        'Markets',
-    quickNote:      'Nota rápida',
-    writeSomething: 'Escribe algo...',
-    // Search
-    searchPlaceholder: 'Buscar o ir a una URL...',
-    // Modal tabs
-    links:          'Links',
-    videos:         'Vídeos',
-    searchEngine:   'Buscador',
-    background:     'Fondo',
-    language:       'Idioma',
-    // Tab Links
-    linksHint:      'Los grupos se organizan en <strong>secciones</strong>. Cada sección es una fila de columnas en el dashboard.',
-    newSection:     'Nueva sección',
-    sectionName:    'Nombre de sección',
-    sectionPlaceholder: 'Trabajo, Dev, Casa…',
-    createSection:  'Crear sección',
-    newGroupIn:     'Nuevo grupo en:',
-    groupName:      'Nombre del grupo',
-    groupPlaceholder: 'Gmail, GitHub, Proxmox…',
-    createGroup:    'Crear grupo',
-    addLinkTo:      'Añadir link en:',
-    addLink:        'Añadir link',
-    iconLabel:      'Icono — URL personalizada <span style="color:var(--text-dim);font-weight:300">(opcional, se sugiere automáticamente)</span>',
-    // Tab Feeds
-    addFeed:        'Añadir feed',
-    // Tab Markets
-    marketsHint:    'Precios en tiempo real via CoinGecko (gratuito, sin API key). Introduce el <strong>ID de CoinGecko</strong> de cada activo (ej: <em>bitcoin</em>, <em>ethereum</em>, <em>solana</em>).',
-    addAsset:       'Añadir activo',
-    // Tab Videos
-    videosHint:     'Añade canales de YouTube por su <strong>Channel ID</strong> o por su <strong>@handle</strong>.',
-    videosHintHandle:'💡 Puedes usar el @ directamente: <em>@naseros</em>, <em>@SoyITPro</em>… El ID se resuelve automáticamente.',
-    addChannel:     'Añadir canal',
-    videosToShow:   'Vídeos a mostrar',
-    manageChannels: 'Gestionar canales',
-    // Tab Engine
-    engineHint:     'Selecciona el buscador por defecto. Las URLs directas siempre se abren sin buscador.',
-    // Tab Wall
-    wallHint:       'Introduce una URL de imagen abajo',
-    imageUrl:       'URL de imagen',
-    wallUrlHint:    'Unsplash, Picsum, cualquier URL pública directa · se sincroniza entre dispositivos',
-    presetGradients:'Gradientes predefinidos',
-    opacity:        'Opacidad',
-    darken:         'Oscurecer',
-    blur:           'Desenfoque',
-    tint:           'Tono',
-    glass:          'Cristal',
-    removeBackground:'Quitar fondo',
-    // Tab Lang
-    langHint:       'Selecciona el idioma de la interfaz.',
-    // Sync badge
-    synced:         '↑ sincronizado',
-    syncing:        '↑ sincronizando…',
-    syncError:      '⚠ sin sync',
-    // Videos section
-    videosLabel:    'VÍDEOS',
-    // Calendar days/months handled separately
-    days:    ['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'],
-    months:  ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'],
+    settings: 'Configuración', close: 'Cerrar', cancel: 'Cancelar', add: 'Añadir', apply: 'Aplicar', restore: 'Restaurar',
+    refresh: 'Actualizar', manage: 'Gestionar', name: 'Nombre', items: 'Ítems', popular: 'Populares…',
+    clickToSelect: 'Clic para seleccionar', clickToAdd: 'Clic para añadir', loading: 'Cargando...',
+    symbol: 'Símbolo', displayName: 'Nombre para mostrar', export: 'Exportar', import: 'Importar',
+    news: 'Noticias', feedEmpty: 'Añade un feed RSS desde Links.',
+    goodMorning: 'Buenos días', goodAfternoon: 'Buenas tardes', goodEvening: 'Buenas noches',
+    weather: 'Clima', wind: 'Viento', humidity: 'Humedad', feelsLike: 'Sensac.', calendar: 'Calendario',
+    markets: 'Markets', quickNote: 'Nota rápida', writeSomething: 'Escribe algo...',
+    searchPlaceholder: 'Buscar o ir a una URL...', links: 'Links', videos: 'Vídeos',
+    searchEngine: 'Buscador', background: 'Fondo', language: 'Idioma',
+    linksHint: 'Los grupos se organizan en <strong>secciones</strong>. Cada sección es una fila de columnas en el dashboard.',
+    newSection: 'Nueva sección', sectionName: 'Nombre de sección', sectionPlaceholder: 'Trabajo, Dev, Casa…',
+    createSection: 'Crear sección', newGroupIn: 'Nuevo grupo en:', groupName: 'Nombre del grupo',
+    groupPlaceholder: 'Gmail, GitHub, Proxmox…', createGroup: 'Crear grupo', addLinkTo: 'Añadir link en:',
+    addLink: 'Añadir link', iconLabel: 'Icono — URL personalizada <span style="color:var(--text-dim);font-weight:300">(opcional, se sugiere automáticamente)</span>',
+    addFeed: 'Añadir feed',
+    marketsHint: 'Precios en tiempo real via CoinGecko (gratuito, sin API key). Introduce el <strong>ID de CoinGecko</strong> de cada activo (ej: <em>bitcoin</em>, <em>ethereum</em>, <em>solana</em>).',
+    addAsset: 'Añadir activo',
+    videosHint: 'Añade canales de YouTube por su <strong>Channel ID</strong> o por su <strong>@handle</strong>.',
+    videosHintHandle: '💡 Puedes usar el @ directamente: <em>@naseros</em>, <em>@SoyITPro</em>… El ID se resuelve automáticamente.',
+    addChannel: 'Añadir canal', videosToShow: 'Vídeos a mostrar', manageChannels: 'Gestionar canales',
+    engineHint: 'Selecciona el buscador por defecto. Las URLs directas siempre se abren sin buscador.',
+    wallHint: 'Introduce una URL de imagen abajo', imageUrl: 'URL de imagen',
+    wallUrlHint: 'Unsplash, Picsum, cualquier URL pública directa · se sincroniza entre dispositivos',
+    presetGradients: 'Gradientes predefinidos', opacity: 'Opacidad', darken: 'Oscurecer', blur: 'Desenfoque',
+    tint: 'Tono', glass: 'Cristal', removeBackground: 'Quitar fondo',
+    langHint: 'Selecciona el idioma de la interfaz.',
+    synced: '↑ sincronizado', syncing: '↑ sincronizando…', syncError: '⚠ sin sync',
+    videosLabel: 'VÍDEOS',
+    days: ['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'],
+    months: ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'],
     monthsShort: ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'],
-    dow:     ['Lu','Ma','Mi','Ju','Vi','Sá','Do'],
-    // Weather codes
+    dow: ['Lu','Ma','Mi','Ju','Vi','Sá','Do'],
     weatherCodes: {0:'Despejado',1:'Casi despejado',2:'Parcialmente nublado',3:'Nublado',45:'Niebla',48:'Niebla',51:'Llovizna',61:'Lluvia',63:'Lluvia',65:'Lluvia',71:'Nieve',80:'Chubascos',81:'Chubascos',95:'Tormenta'},
-    // Appearance
-    appearance:     'Apariencia',
-    theme:          'Tema',
-    themeHint:      'Personaliza la paleta de colores de la interfaz.',
-    fontSize:       'Tamaño de fuente',
-    editLink:       'Editar link',
-    // Alert Add link
-    alertAddLink:   'Rellena nombre y URL.',
-    // Uptime Kuma
-    uptime:         'Uptime',
-    uptimeHint:     'Conecta con tu instancia de Uptime Kuma a través de una Status Page pública. No requiere credenciales.',
-    uptimeUrl:      'URL de Uptime Kuma',
-    save:           'Guardar',
-    remove:         'Eliminar',
-    uptimeAllUp:    'Todos operativos',
-    uptimePartial:  'Degradado',
-    uptimeDown:     'Incidente activo',
-    uptimeError:    'Error al conectar',
-    uptimeLoading:  'Conectando…',
-    // Tab Acerca de
-    about:            'Acerca de',
-    aboutTagline:     'Nueva pestaña minimalista para Firefox',
-    aboutProject:     'Proyecto',
-    aboutDeveloper:   'Desarrollador',
-    aboutVersionLabel:'Versión',
-    aboutLicense:     'Licencia',
+    appearance: 'Apariencia', theme: 'Tema', themeHint: 'Personaliza la paleta de colores de la interfaz.',
+    fontSize: 'Tamaño de fuente', editLink: 'Editar link', alertAddLink: 'Rellena nombre y URL.',
+    uptime: 'Uptime', uptimeHint: 'Conecta con tu instancia de Uptime Kuma a través de una Status Page pública. No requiere credenciales.',
+    uptimeUrl: 'URL de Uptime Kuma', save: 'Guardar', remove: 'Eliminar',
+    uptimeAllUp: 'Todos operativos', uptimePartial: 'Degradado', uptimeDown: 'Incidente activo',
+    uptimeError: 'Error al conectar', uptimeLoading: 'Conectando…',
+    about: 'Acerca de', aboutTagline: 'Nueva pestaña minimalista para Firefox',
+    aboutProject: 'Proyecto', aboutDeveloper: 'Desarrollador', aboutVersionLabel: 'Versión',
+    aboutLicense: 'Licencia',
     aboutLicenseHint: 'Publicado bajo licencia MIT: software libre y gratuito. Puedes usarlo, modificarlo y redistribuirlo sin restricciones, conservando el aviso de copyright.',
-    aboutPrivacy:     'Toda tu configuración se guarda <strong>en tu propio navegador</strong> y se sincroniza con tu cuenta de Firefox. La extensión no recopila ni envía datos personales, y no necesita ninguna API key.',
-    // Alerts & status
-    noItems:          'Sin ítems.',
-    noSections:       'Sin secciones aún.',
-    noFeeds:          'Sin feeds.',
-    noAssets:         'Sin activos.',
-    noChannels:       'Sin canales. Añade uno abajo.',
-    noVideos:         'Sin vídeos. Añade canales desde ⚙',
-    noMarketsAdded:   'Añade activos desde ⚙',
-    loadingDots:      'Cargando…',
-    loadingVideos:    'Cargando vídeos…',
-    errorFeed:        'Error cargando feed.',
-    errorMarkets:     'Error al cargar — CoinGecko puede tener límite de peticiones. Inténtalo en un momento.',
-    errorChannel:     'No se pudo cargar el canal.',
-    errorImageLoad:   '⚠ No se pudo cargar la imagen',
-    wallPreview:      'Vista previa',
-    wallEnterUrl:     'Introduce una URL de imagen abajo',
-    searchWith:       'Buscar con',
-    searchOrUrl:      'o ir a una URL…',
-    // alerts
-    alertFillFields:  'Rellena al menos el ID de CoinGecko y el símbolo.',
-    alertAssetExists: 'Ya existe ese activo.',
-    alertFillChannel: 'Introduce el Channel ID.',
-    alertChannelExists:'Canal ya añadido.',
+    aboutPrivacy: 'Toda tu configuración se guarda <strong>en tu propio navegador</strong> y se sincroniza con tu cuenta de Firefox. La extensión no recopila ni envía datos personales, y no necesita ninguna API key.',
+    noItems: 'Sin ítems.', noSections: 'Sin secciones aún.', noFeeds: 'Sin feeds.', noAssets: 'Sin activos.',
+    noChannels: 'Sin canales. Añade uno abajo.', noVideos: 'Sin vídeos. Añade canales desde ⚙',
+    noMarketsAdded: 'Añade activos desde ⚙', loadingDots: 'Cargando…', loadingVideos: 'Cargando vídeos…',
+    errorFeed: 'Error cargando feed.', errorMarkets: 'Error al cargar — CoinGecko puede tener límite de peticiones. Inténtalo en un momento.',
+    errorChannel: 'No se pudo cargar el canal.', errorImageLoad: '⚠ No se pudo cargar la imagen',
+    wallPreview: 'Vista previa', wallEnterUrl: 'Introduce una URL de imagen abajo',
+    searchWith: 'Buscar con', searchOrUrl: 'o ir a una URL…',
+    alertFillFields: 'Rellena al menos el ID de CoinGecko y el símbolo.', alertAssetExists: 'Ya existe ese activo.',
+    alertFillChannel: 'Introduce el Channel ID.', alertChannelExists: 'Canal ya añadido.',
     alertInvalidFile: 'Archivo no válido. Asegúrate de que es un export de Dashboard.',
-    alertImportOk:    '✓ Configuración importada correctamente.',
-    alertImportError: 'Error al leer el archivo. Asegúrate de que es un JSON válido.',
-    alertAddLink:     'Rellena nombre y URL.',
-    alertAddFeed:     'Rellena nombre y URL.',
-    alertAddGroup:    'Introduce un nombre para el grupo.',
-    alertAddSection:  'Introduce un nombre para la sección.',
-    // import confirm
-    importConfirmTitle: '¿Importar configuración del',
-    importConfirmSections: 'secciones de links',
-    importConfirmFeeds:    'feeds RSS',
-    importConfirmMarkets:  'activos de mercado',
-    importConfirmChannels: 'canales de vídeo',
-    importConfirmWarning:  'Esto reemplazará tu configuración actual.',
-    // export filename
-    exportFilename:   'dashboard-config',
-    // sync
-    syncActiveMsg:    '⇅ Firefox Sync activo',
-    syncLocalMsg:     'local (sin sync)',
+    alertImportOk: '✓ Configuración importada correctamente.', alertImportError: 'Error al leer el archivo. Asegúrate de que es un JSON válido.',
+    alertAddFeed: 'Rellena nombre y URL.', alertAddGroup: 'Introduce un nombre para el grupo.',
+    alertAddSection: 'Introduce un nombre para la sección.',
+    importConfirmTitle: '¿Importar configuración del', importConfirmSections: 'secciones de links',
+    importConfirmFeeds: 'feeds RSS', importConfirmMarkets: 'activos de mercado', importConfirmChannels: 'canales de vídeo',
+    importConfirmWarning: 'Esto reemplazará tu configuración actual.', exportFilename: 'dashboard-config',
+    syncActiveMsg: '⇅ Firefox Sync activo', syncLocalMsg: 'local (sin sync)',
+    // New keys for full i18n
+    feedsRss: 'Feeds RSS', newLinkIn: 'Nuevo link en:', rssUrl: 'URL RSS', coingeckoId: 'ID CoinGecko',
+    channelId: 'Channel ID', slug: 'Slug',
+    videosTip: '💡 Tip: si el canal tiene URL con <em>@usuario</em>, busca el Channel ID en <a href="https://www.youtube.com/@usuario/about" target="_blank" style="color:var(--accent-warm)">su página About</a> → Compartir → Copiar ID del canal.',
+    groups: 'grupos', linksWord: 'links', addGroupBtn: '+ Grupo', addLinkBtn: '+ Link',
+    noBackground: 'Sin fondo', monitorsFound: 'monitores encontrados', weekShort: 'sem',
   },
   en: {
-    // General
-    settings:       'Settings',
-    close:          'Close',
-    cancel:         'Cancel',
-    add:            'Add',
-    apply:          'Apply',
-    restore:        'Restore',
-    refresh:        'Refresh',
-    manage:         'Manage',
-    name:           'Name',
-    items:          'Items',
-    popular:        'Popular…',
-    clickToSelect:  'Click to select',
-    clickToAdd:     'Click to add',
-    loading:        'Loading...',
-    symbol:         'Symbol',
-    displayName:    'Display name',
-    export:         'Export',
-    import:         'Import',
-    // Sidebar
-    news:           'News',
-    feedEmpty:      'Add an RSS feed from Links.',
-    // Greetings
-    goodMorning:    'Good morning',
-    goodAfternoon:  'Good afternoon',
-    goodEvening:    'Good evening',
-    // Panel
-    weather:        'Weather',
-    wind:           'Wind',
-    humidity:       'Humidity',
-    feelsLike:      'Feels like',
-    calendar:       'Calendar',
-    markets:        'Markets',
-    quickNote:      'Quick note',
-    writeSomething: 'Write something...',
-    // Search
-    searchPlaceholder: 'Search or go to a URL...',
-    // Modal tabs
-    links:          'Links',
-    videos:         'Videos',
-    searchEngine:   'Search engine',
-    background:     'Background',
-    language:       'Language',
-    // Tab Links
-    linksHint:      'Groups are organized into <strong>sections</strong>. Each section is a row of columns in the dashboard.',
-    newSection:     'New section',
-    sectionName:    'Section name',
-    sectionPlaceholder: 'Work, Dev, Home…',
-    createSection:  'Create section',
-    newGroupIn:     'New group in:',
-    groupName:      'Group name',
-    groupPlaceholder: 'Gmail, GitHub, Proxmox…',
-    createGroup:    'Create group',
-    addLinkTo:      'Add link to:',
-    addLink:        'Add link',
-    iconLabel:      'Icon — custom URL <span style="color:var(--text-dim);font-weight:300">(optional, suggested automatically)</span>',
-    // Tab Feeds
-    addFeed:        'Add feed',
-    // Tab Markets
-    marketsHint:    'Real-time prices via CoinGecko (free, no API key). Enter the <strong>CoinGecko ID</strong> of each asset (e.g. <em>bitcoin</em>, <em>ethereum</em>, <em>solana</em>).',
-    addAsset:       'Add asset',
-    // Tab Videos
-    videosHint:     'Add YouTube channels by their <strong>Channel ID</strong> or <strong>@handle</strong>.',
-    videosHintHandle:'💡 You can use the @ handle directly: <em>@naseros</em>, <em>@SoyITPro</em>… The ID is resolved automatically.',
-    addChannel:     'Add channel',
-    videosToShow:   'Videos to show',
-    manageChannels: 'Manage channels',
-    // Tab Engine
-    engineHint:     'Select the default search engine. Direct URLs always open without a search engine.',
-    // Tab Wall
-    wallHint:       'Enter an image URL below',
-    imageUrl:       'Image URL',
-    wallUrlHint:    'Unsplash, Picsum, any public direct URL · syncs across devices',
-    presetGradients:'Preset gradients',
-    opacity:        'Opacity',
-    darken:         'Darken',
-    blur:           'Blur',
-    tint:           'Tint',
-    glass:          'Glass',
-    removeBackground:'Remove background',
-    // Tab Lang
-    langHint:       'Select the interface language.',
-    // Sync badge
-    synced:         '↑ synced',
-    syncing:        '↑ syncing…',
-    syncError:      '⚠ sync error',
-    // Videos section
-    videosLabel:    'VIDEOS',
-    // Calendar
-    days:    ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'],
-    months:  ['January','February','March','April','May','June','July','August','September','October','November','December'],
+    settings: 'Settings', close: 'Close', cancel: 'Cancel', add: 'Add', apply: 'Apply', restore: 'Restore',
+    refresh: 'Refresh', manage: 'Manage', name: 'Name', items: 'Items', popular: 'Popular…',
+    clickToSelect: 'Click to select', clickToAdd: 'Click to add', loading: 'Loading...',
+    symbol: 'Symbol', displayName: 'Display name', export: 'Export', import: 'Import',
+    news: 'News', feedEmpty: 'Add an RSS feed from Links.',
+    goodMorning: 'Good morning', goodAfternoon: 'Good afternoon', goodEvening: 'Good evening',
+    weather: 'Weather', wind: 'Wind', humidity: 'Humidity', feelsLike: 'Feels like', calendar: 'Calendar',
+    markets: 'Markets', quickNote: 'Quick note', writeSomething: 'Write something...',
+    searchPlaceholder: 'Search or go to a URL...', links: 'Links', videos: 'Videos',
+    searchEngine: 'Search engine', background: 'Background', language: 'Language',
+    linksHint: 'Groups are organized into <strong>sections</strong>. Each section is a row of columns in the dashboard.',
+    newSection: 'New section', sectionName: 'Section name', sectionPlaceholder: 'Work, Dev, Home…',
+    createSection: 'Create section', newGroupIn: 'New group in:', groupName: 'Group name',
+    groupPlaceholder: 'Gmail, GitHub, Proxmox…', createGroup: 'Create group', addLinkTo: 'Add link to:',
+    addLink: 'Add link', iconLabel: 'Icon — custom URL <span style="color:var(--text-dim);font-weight:300">(optional, suggested automatically)</span>',
+    addFeed: 'Add feed',
+    marketsHint: 'Real-time prices via CoinGecko (free, no API key). Enter the <strong>CoinGecko ID</strong> of each asset (e.g. <em>bitcoin</em>, <em>ethereum</em>, <em>solana</em>).',
+    addAsset: 'Add asset',
+    videosHint: 'Add YouTube channels by their <strong>Channel ID</strong> or <strong>@handle</strong>.',
+    videosHintHandle: '💡 You can use the @ handle directly: <em>@naseros</em>, <em>@SoyITPro</em>… The ID is resolved automatically.',
+    addChannel: 'Add channel', videosToShow: 'Videos to show', manageChannels: 'Manage channels',
+    engineHint: 'Select the default search engine. Direct URLs always open without a search engine.',
+    wallHint: 'Enter an image URL below', imageUrl: 'Image URL',
+    wallUrlHint: 'Unsplash, Picsum, any public direct URL · syncs across devices',
+    presetGradients: 'Preset gradients', opacity: 'Opacity', darken: 'Darken', blur: 'Blur',
+    tint: 'Tint', glass: 'Glass', removeBackground: 'Remove background',
+    langHint: 'Select the interface language.',
+    synced: '↑ synced', syncing: '↑ syncing…', syncError: '⚠ sync error',
+    videosLabel: 'VIDEOS',
+    days: ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'],
+    months: ['January','February','March','April','May','June','July','August','September','October','November','December'],
     monthsShort: ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'],
-    dow:     ['Mo','Tu','We','Th','Fr','Sa','Su'],
-    // Weather codes
+    dow: ['Mo','Tu','We','Th','Fr','Sa','Su'],
     weatherCodes: {0:'Clear sky',1:'Mainly clear',2:'Partly cloudy',3:'Overcast',45:'Fog',48:'Fog',51:'Drizzle',61:'Rain',63:'Rain',65:'Rain',71:'Snow',80:'Showers',81:'Showers',95:'Thunderstorm'},
-    // Appearance
-    appearance:     'Appearance',
-    theme:          'Theme',
-    themeHint:      'Customize the interface color palette.',
-    fontSize:       'Font size',
-    editLink:       'Edit link',
-    // Alert Add link
-    alertAddLink:   'Please fill in name and URL.',
-    // Uptime Kuma
-    uptime:         'Uptime',
-    uptimeHint:     'Connect to your Uptime Kuma instance via a public Status Page. No credentials required.',
-    uptimeUrl:      'Uptime Kuma URL',
-    save:           'Save',
-    remove:         'Remove',
-    uptimeAllUp:    'All operational',
-    uptimePartial:  'Degraded',
-    uptimeDown:     'Active incident',
-    uptimeError:    'Connection error',
-    uptimeLoading:  'Connecting…',
-    // Tab About
-    about:            'About',
-    aboutTagline:     'A minimal new tab for Firefox',
-    aboutProject:     'Project',
-    aboutDeveloper:   'Developer',
-    aboutVersionLabel:'Version',
-    aboutLicense:     'License',
+    appearance: 'Appearance', theme: 'Theme', themeHint: 'Customize the interface color palette.',
+    fontSize: 'Font size', editLink: 'Edit link', alertAddLink: 'Please fill in name and URL.',
+    uptime: 'Uptime', uptimeHint: 'Connect to your Uptime Kuma instance via a public Status Page. No credentials required.',
+    uptimeUrl: 'Uptime Kuma URL', save: 'Save', remove: 'Remove',
+    uptimeAllUp: 'All operational', uptimePartial: 'Degraded', uptimeDown: 'Active incident',
+    uptimeError: 'Connection error', uptimeLoading: 'Connecting…',
+    about: 'About', aboutTagline: 'A minimal new tab for Firefox',
+    aboutProject: 'Project', aboutDeveloper: 'Developer', aboutVersionLabel: 'Version',
+    aboutLicense: 'License',
     aboutLicenseHint: 'Released under the MIT license: free and open source software. You may use, modify and redistribute it without restrictions, keeping the copyright notice.',
-    aboutPrivacy:     'All your settings are stored <strong>in your own browser</strong> and synced through your Firefox account. The extension does not collect or send any personal data, and needs no API keys.',
-    // Alerts & status
-    noItems:          'No items.',
-    noSections:       'No sections yet.',
-    noFeeds:          'No feeds.',
-    noAssets:         'No assets.',
-    noChannels:       'No channels. Add one below.',
-    noVideos:         'No videos. Add channels from ⚙',
-    noMarketsAdded:   'Add assets from ⚙',
-    loadingDots:      'Loading…',
-    loadingVideos:    'Loading videos…',
-    errorFeed:        'Error loading feed.',
-    errorMarkets:     'Error loading — CoinGecko may be rate-limited. Try again in a moment.',
-    errorChannel:     'Could not load channel.',
-    errorImageLoad:   '⚠ Could not load image',
-    wallPreview:      'Preview',
-    wallEnterUrl:     'Enter an image URL below',
-    searchWith:       'Search with',
-    searchOrUrl:      'or go to a URL…',
-    // alerts
-    alertFillFields:  'Please fill in the CoinGecko ID and symbol.',
-    alertAssetExists: 'This asset already exists.',
-    alertFillChannel: 'Please enter the Channel ID.',
-    alertChannelExists:'Channel already added.',
+    aboutPrivacy: 'All your settings are stored <strong>in your own browser</strong> and synced through your Firefox account. The extension does not collect or send any personal data, and needs no API keys.',
+    noItems: 'No items.', noSections: 'No sections yet.', noFeeds: 'No feeds.', noAssets: 'No assets.',
+    noChannels: 'No channels. Add one below.', noVideos: 'No videos. Add channels from ⚙',
+    noMarketsAdded: 'Add assets from ⚙', loadingDots: 'Loading…', loadingVideos: 'Loading videos…',
+    errorFeed: 'Error loading feed.', errorMarkets: 'Error loading — CoinGecko may be rate-limited. Try again in a moment.',
+    errorChannel: 'Could not load channel.', errorImageLoad: '⚠ Could not load image',
+    wallPreview: 'Preview', wallEnterUrl: 'Enter an image URL below',
+    searchWith: 'Search with', searchOrUrl: 'or go to a URL…',
+    alertFillFields: 'Please fill in the CoinGecko ID and symbol.', alertAssetExists: 'This asset already exists.',
+    alertFillChannel: 'Please enter the Channel ID.', alertChannelExists: 'Channel already added.',
     alertInvalidFile: 'Invalid file. Make sure it is a Dashboard export.',
-    alertImportOk:    '✓ Configuration imported successfully.',
-    alertImportError: 'Error reading file. Make sure it is valid JSON.',
-    alertAddLink:     'Please fill in name and URL.',
-    alertAddFeed:     'Please fill in name and URL.',
-    alertAddGroup:    'Please enter a group name.',
-    alertAddSection:  'Please enter a section name.',
-    // import confirm
-    importConfirmTitle: 'Import configuration from',
-    importConfirmSections: 'link sections',
-    importConfirmFeeds:    'RSS feeds',
-    importConfirmMarkets:  'market assets',
-    importConfirmChannels: 'video channels',
-    importConfirmWarning:  'This will replace your current configuration.',
-    // export filename
-    exportFilename:   'dashboard-config',
-    // sync
-    syncActiveMsg:    '⇅ Firefox Sync active',
-    syncLocalMsg:     'local (no sync)',
+    alertImportOk: '✓ Configuration imported successfully.', alertImportError: 'Error reading file. Make sure it is valid JSON.',
+    alertAddFeed: 'Please fill in name and URL.', alertAddGroup: 'Please enter a group name.',
+    alertAddSection: 'Please enter a section name.',
+    importConfirmTitle: 'Import configuration from', importConfirmSections: 'link sections',
+    importConfirmFeeds: 'RSS feeds', importConfirmMarkets: 'market assets', importConfirmChannels: 'video channels',
+    importConfirmWarning: 'This will replace your current configuration.', exportFilename: 'dashboard-config',
+    syncActiveMsg: '⇅ Firefox Sync active', syncLocalMsg: 'local (no sync)',
+    feedsRss: 'RSS Feeds', newLinkIn: 'New link in:', rssUrl: 'RSS URL', coingeckoId: 'CoinGecko ID',
+    channelId: 'Channel ID', slug: 'Slug',
+    videosTip: '💡 Tip: if the channel has a URL with <em>@user</em>, find the Channel ID on <a href="https://www.youtube.com/@user/about" target="_blank" style="color:var(--accent-warm)">its About page</a> → Share → Copy channel ID.',
+    groups: 'groups', linksWord: 'links', addGroupBtn: '+ Group', addLinkBtn: '+ Link',
+    noBackground: 'No background', monitorsFound: 'monitors found', weekShort: 'w',
+  },
+  ru: {
+    settings: 'Настройки', close: 'Закрыть', cancel: 'Отмена', add: 'Добавить', apply: 'Применить', restore: 'Сбросить',
+    refresh: 'Обновить', manage: 'Управлять', name: 'Название', items: 'Элементы', popular: 'Популярные…',
+    clickToSelect: 'Нажмите, чтобы выбрать', clickToAdd: 'Нажмите, чтобы добавить', loading: 'Загрузка...',
+    symbol: 'Символ', displayName: 'Отображаемое имя', export: 'Экспорт', import: 'Импорт',
+    news: 'Новости', feedEmpty: 'Добавьте RSS-ленту во вкладке Links.',
+    goodMorning: 'Доброе утро', goodAfternoon: 'Добрый день', goodEvening: 'Добрый вечер',
+    weather: 'Погода', wind: 'Ветер', humidity: 'Влажность', feelsLike: 'Ощущ.', calendar: 'Календарь',
+    markets: 'Рынки', quickNote: 'Быстрая заметка', writeSomething: 'Напишите что-нибудь...',
+    searchPlaceholder: 'Поиск или переход по URL...', links: 'Ссылки', videos: 'Видео',
+    searchEngine: 'Поисковик', background: 'Фон', language: 'Язык',
+    linksHint: 'Группы организованы в <strong>разделы</strong>. Каждый раздел — это ряд колонок на дашборде.',
+    newSection: 'Новый раздел', sectionName: 'Название раздела', sectionPlaceholder: 'Работа, Dev, Дом…',
+    createSection: 'Создать раздел', newGroupIn: 'Новая группа в:', groupName: 'Название группы',
+    groupPlaceholder: 'Gmail, GitHub, Proxmox…', createGroup: 'Создать группу', addLinkTo: 'Добавить ссылку в:',
+    addLink: 'Добавить ссылку', iconLabel: 'Иконка — свой URL <span style="color:var(--text-dim);font-weight:300">(необязательно, подставляется автоматически)</span>',
+    addFeed: 'Добавить ленту',
+    marketsHint: 'Цены в реальном времени через CoinGecko (бесплатно, без API key). Введите <strong>ID CoinGecko</strong> каждого актива (например: <em>bitcoin</em>, <em>ethereum</em>, <em>solana</em>).',
+    addAsset: 'Добавить актив',
+    videosHint: 'Добавляйте YouTube-каналы по <strong>Channel ID</strong> или <strong>@handle</strong>.',
+    videosHintHandle: '💡 Можно использовать @ напрямую: <em>@naseros</em>, <em>@SoyITPro</em>… ID определяется автоматически.',
+    addChannel: 'Добавить канал', videosToShow: 'Видео для показа', manageChannels: 'Управление каналами',
+    engineHint: 'Выберите поисковик по умолчанию. Прямые URL всегда открываются без поисковика.',
+    wallHint: 'Введите URL изображения ниже', imageUrl: 'URL изображения',
+    wallUrlHint: 'Unsplash, Picsum, любой публичный прямой URL · синхронизируется между устройствами',
+    presetGradients: 'Готовые градиенты', opacity: 'Прозрачность', darken: 'Затемнение', blur: 'Размытие',
+    tint: 'Тон', glass: 'Стекло', removeBackground: 'Убрать фон',
+    langHint: 'Выберите язык интерфейса.',
+    synced: '↑ синхронизировано', syncing: '↑ синхронизация…', syncError: '⚠ ошибка sync',
+    videosLabel: 'ВИДЕО',
+    days: ['Воскресенье','Понедельник','Вторник','Среда','Четверг','Пятница','Суббота'],
+    months: ['Январь','Февраль','Март','Апрель','Май','Июнь','Июль','Август','Сентябрь','Октябрь','Ноябрь','Декабрь'],
+    monthsShort: ['Янв','Фев','Мар','Апр','Май','Июн','Июл','Авг','Сен','Окт','Ноя','Дек'],
+    dow: ['Пн','Вт','Ср','Чт','Пт','Сб','Вс'],
+    weatherCodes: {0:'Ясно',1:'Преимущественно ясно',2:'Переменная облачность',3:'Пасмурно',45:'Туман',48:'Туман',51:'Морось',61:'Дождь',63:'Дождь',65:'Дождь',71:'Снег',80:'Ливень',81:'Ливень',95:'Гроза'},
+    appearance: 'Внешний вид', theme: 'Тема', themeHint: 'Настройте цветовую палитру интерфейса.',
+    fontSize: 'Размер шрифта', editLink: 'Редактировать ссылку', alertAddLink: 'Заполните название и URL.',
+    uptime: 'Uptime', uptimeHint: 'Подключите свой экземпляр Uptime Kuma через публичную Status Page. Учётные данные не требуются.',
+    uptimeUrl: 'URL Uptime Kuma', save: 'Сохранить', remove: 'Удалить',
+    uptimeAllUp: 'Все работают', uptimePartial: 'Частичные сбои', uptimeDown: 'Активный инцидент',
+    uptimeError: 'Ошибка подключения', uptimeLoading: 'Подключение…',
+    about: 'О программе', aboutTagline: 'Минималистичная новая вкладка для Firefox',
+    aboutProject: 'Проект', aboutDeveloper: 'Разработчик', aboutVersionLabel: 'Версия',
+    aboutLicense: 'Лицензия',
+    aboutLicenseHint: 'Опубликовано под лицензией MIT: свободное и открытое ПО. Вы можете использовать, изменять и распространять его без ограничений, сохраняя уведомление об авторских правах.',
+    aboutPrivacy: 'Все ваши настройки хранятся <strong>в вашем браузере</strong> и синхронизируются через аккаунт Firefox. Расширение не собирает и не отправляет персональные данные и не требует API-ключей.',
+    noItems: 'Нет элементов.', noSections: 'Разделов пока нет.', noFeeds: 'Нет лент.', noAssets: 'Нет активов.',
+    noChannels: 'Нет каналов. Добавьте ниже.', noVideos: 'Нет видео. Добавьте каналы через ⚙',
+    noMarketsAdded: 'Добавьте активы через ⚙', loadingDots: 'Загрузка…', loadingVideos: 'Загрузка видео…',
+    errorFeed: 'Ошибка загрузки ленты.', errorMarkets: 'Ошибка загрузки — у CoinGecko может быть лимит запросов. Попробуйте чуть позже.',
+    errorChannel: 'Не удалось загрузить канал.', errorImageLoad: '⚠ Не удалось загрузить изображение',
+    wallPreview: 'Предпросмотр', wallEnterUrl: 'Введите URL изображения ниже',
+    searchWith: 'Искать через', searchOrUrl: 'или перейти по URL…',
+    alertFillFields: 'Заполните как минимум ID CoinGecko и символ.', alertAssetExists: 'Такой актив уже добавлен.',
+    alertFillChannel: 'Введите Channel ID.', alertChannelExists: 'Канал уже добавлен.',
+    alertInvalidFile: 'Неверный файл. Убедитесь, что это экспорт Dashboard.',
+    alertImportOk: '✓ Конфигурация успешно импортирована.', alertImportError: 'Ошибка чтения файла. Убедитесь, что это корректный JSON.',
+    alertAddFeed: 'Заполните название и URL.', alertAddGroup: 'Введите название группы.',
+    alertAddSection: 'Введите название раздела.',
+    importConfirmTitle: 'Импортировать конфигурацию от',
+    importConfirmSections: 'разделов ссылок', importConfirmFeeds: 'RSS-лент',
+    importConfirmMarkets: 'рыночных активов', importConfirmChannels: 'видеоканалов',
+    importConfirmWarning: 'Это заменит текущую конфигурацию.', exportFilename: 'dashboard-config',
+    syncActiveMsg: '⇅ Firefox Sync активен', syncLocalMsg: 'локально (без sync)',
+    feedsRss: 'RSS-ленты', newLinkIn: 'Новая ссылка в:', rssUrl: 'URL RSS', coingeckoId: 'ID CoinGecko',
+    channelId: 'Channel ID', slug: 'Slug',
+    videosTip: '💡 Совет: если у канала URL с <em>@пользователь</em>, Channel ID можно найти на <a href="https://www.youtube.com/@пользователь/about" target="_blank" style="color:var(--accent-warm)">странице About</a> → Поделиться → Скопировать ID канала.',
+    groups: 'групп', linksWord: 'ссылок', addGroupBtn: '+ Группа', addLinkBtn: '+ Ссылка',
+    noBackground: 'Без фона', monitorsFound: 'мониторов найдено', weekShort: 'нед',
   }
 };
 
 let currentLang = 'es';
-let t = LANGUAGES.es; // active translations shortcut
+let t = LANGUAGES.es;
+
+function getLocale() {
+  if (currentLang === 'ru') return 'ru-RU';
+  if (currentLang === 'es') return 'es-ES';
+  return 'en-GB';
+}
 
 function applyLang(langCode, save=true) {
   currentLang = langCode;
   t = LANGUAGES[langCode] || LANGUAGES.es;
   if (save) Store.set('gd_lang', langCode);
 
-  // Update all data-i18n elements
   document.querySelectorAll('[data-i18n]').forEach(el => {
     const key = el.dataset.i18n;
     if (t[key] !== undefined) el.textContent = t[key];
@@ -521,7 +398,6 @@ function applyLang(langCode, save=true) {
   document.querySelectorAll('[data-i18n-html]').forEach(el => {
     const key = el.dataset.i18nHtml;
     if (t[key] === undefined) return;
-    // Safe: content comes exclusively from our own LANGUAGES constant, never from user/network input
     const parser = new DOMParser();
     const doc = parser.parseFromString(t[key], 'text/html');
     el.textContent = '';
@@ -536,30 +412,28 @@ function applyLang(langCode, save=true) {
     if (t[key] !== undefined) el.placeholder = t[key];
   });
 
-  // Search input placeholder
   const si = document.getElementById('searchInput');
   if (si) si.placeholder = t.searchPlaceholder;
 
-  // Videos label
   const vl = document.querySelector('#videosSection .section-label');
   if (vl) vl.textContent = t.videosLabel;
 
-  // Update document lang
   document.documentElement.lang = langCode;
 
-  // Re-render calendar with new locale
   if (typeof renderCalendar === 'function') renderCalendar();
-
-  // Update lang selector if open
   if (typeof renderLangModal === 'function') renderLangModal();
+  if (typeof renderThemeModal === 'function') renderThemeModal();
+  if (typeof renderSectionModal === 'function') renderSectionModal();
+  if (typeof renderGradientPresets === 'function') renderGradientPresets();
 }
 
 function renderLangModal() {
   const list = document.getElementById('langList'); if (!list) return;
   list.innerHTML = '';
   const langs = [
-    { code:'es', label:'Español', flag:'🇪🇸' },
+    { code:'ru', label:'Русский', flag:'🇷🇺' },
     { code:'en', label:'English', flag:'🇬🇧' },
+    { code:'es', label:'Español', flag:'🇪🇸' },
   ];
   langs.forEach(l => {
     const row = document.createElement('div'); row.className = 'engine-row' + (l.code === currentLang ? ' active' : '');
@@ -621,115 +495,47 @@ function applyEngine(engineId, save=true) {
 }
 
 // ════════════════════════════════════════════════
-//  SMART ICONS — Simple Icons + favicon fallback
+//  SMART ICONS
 // ════════════════════════════════════════════════
 const SI_BASE = 'https://cdn.simpleicons.org/';
 
-// Map common app names to their Simple Icons slug
-// Simple Icons slugs are lowercase, no spaces, no special chars
 function toSimpleIconSlug(name) {
-  return name.toLowerCase()
-    .replace(/[^a-z0-9]/g, '');
+  return name.toLowerCase().replace(/[^a-z0-9]/g, '');
 }
 
-// Known overrides where the slug differs from the name
 const SI_OVERRIDES = {
-  'microsoft365': 'microsoft365',
-  'm365': 'microsoft365',
-  'office365': 'microsoft365',
-  'office 365': 'microsoft365',
-  'microsoft 365': 'microsoft365',
-  'onedrive': 'microsoftonedrive',
-  'sharepoint': 'microsoftsharepoint',
-  'teams': 'microsoftteams',
-  'azure': 'microsoftazure',
-  'outlook': 'microsoftoutlook',
-  'protonmail': 'proton',
-  'proton mail': 'proton',
-  'openerp': 'odoo',
-  'odoo': 'odoo',
-  'proxmox': 'proxmox',
-  'portainer': 'portainer',
-  'plex': 'plex',
-  'nextcloud': 'nextcloud',
-  'truenas': 'truenas',
-  'unifi': 'ubiquiti',
-  'ubiquiti': 'ubiquiti',
-  'pihole': 'pihole',
-  'pi-hole': 'pihole',
-  'wireguard': 'wireguard',
-  'vaultwarden': 'bitwarden',
-  'bitwarden': 'bitwarden',
-  'adguard': 'adguard',
-  'grafana': 'grafana',
-  'netdata': 'netdata',
-  'traefik': 'traefikproxy',
-  'uptime kuma': 'uptimekuma',
-  'uptimekuma': 'uptimekuma',
-  'paperless': 'paperlessngx',
-  'homer': 'homer',
-  'github': 'github',
-  'gitlab': 'gitlab',
-  'jira': 'jira',
-  'confluence': 'confluence',
-  'notion': 'notion',
-  'slack': 'slack',
-  'discord': 'discord',
-  'telegram': 'telegram',
-  'whatsapp': 'whatsapp',
-  'gmail': 'gmail',
-  'google': 'google',
-  'googledrive': 'googledrive',
-  'google drive': 'googledrive',
-  'dropbox': 'dropbox',
-  'figma': 'figma',
-  'linear': 'linear',
-  'vercel': 'vercel',
-  'netlify': 'netlify',
-  'cloudflare': 'cloudflare',
-  'aws': 'amazonaws',
-  'amazon': 'amazonaws',
-  'digitalocean': 'digitalocean',
-  'hetzner': 'hetzner',
-  'ovh': 'ovh',
-  'plesk': 'plesk',
-  'wordpress': 'wordpress',
-  'nginx': 'nginx',
-  'apache': 'apache',
-  'docker': 'docker',
-  'kubernetes': 'kubernetes',
-  'terraform': 'terraform',
-  'ansible': 'ansible',
-  'jenkins': 'jenkins',
-  'sonarqube': 'sonarqube',
-  'elasticsearch': 'elasticsearch',
-  'kibana': 'kibana',
-  'redis': 'redis',
-  'postgresql': 'postgresql',
-  'mysql': 'mysql',
-  'mongodb': 'mongodb',
-  'influxdb': 'influxdb',
-  'minio': 'minio',
-  'synology': 'synology',
-  'qnap': 'qnap',
-  'pfsense': 'pfsense',
-  'opnsense': 'opnsense',
-  'mikrotik': 'mikrotik',
-  'eset': 'eset',
-  'acronis': 'acronis',
-  'veeam': 'veeam',
-  'adobe': 'adobe',
-  'intranet': null,  // no simple icon, use favicon
+  'microsoft365': 'microsoft365', 'm365': 'microsoft365', 'office365': 'microsoft365',
+  'office 365': 'microsoft365', 'microsoft 365': 'microsoft365', 'onedrive': 'microsoftonedrive',
+  'sharepoint': 'microsoftsharepoint', 'teams': 'microsoftteams', 'azure': 'microsoftazure',
+  'outlook': 'microsoftoutlook', 'protonmail': 'proton', 'proton mail': 'proton',
+  'openerp': 'odoo', 'odoo': 'odoo', 'proxmox': 'proxmox', 'portainer': 'portainer',
+  'plex': 'plex', 'nextcloud': 'nextcloud', 'truenas': 'truenas', 'unifi': 'ubiquiti',
+  'ubiquiti': 'ubiquiti', 'pihole': 'pihole', 'pi-hole': 'pihole', 'wireguard': 'wireguard',
+  'vaultwarden': 'bitwarden', 'bitwarden': 'bitwarden', 'adguard': 'adguard',
+  'grafana': 'grafana', 'netdata': 'netdata', 'traefik': 'traefikproxy',
+  'uptime kuma': 'uptimekuma', 'uptimekuma': 'uptimekuma', 'paperless': 'paperlessngx',
+  'homer': 'homer', 'github': 'github', 'gitlab': 'gitlab', 'jira': 'jira',
+  'confluence': 'confluence', 'notion': 'notion', 'slack': 'slack', 'discord': 'discord',
+  'telegram': 'telegram', 'whatsapp': 'whatsapp', 'gmail': 'gmail', 'google': 'google',
+  'googledrive': 'googledrive', 'google drive': 'googledrive', 'dropbox': 'dropbox',
+  'figma': 'figma', 'linear': 'linear', 'vercel': 'vercel', 'netlify': 'netlify',
+  'cloudflare': 'cloudflare', 'aws': 'amazonaws', 'amazon': 'amazonaws',
+  'digitalocean': 'digitalocean', 'hetzner': 'hetzner', 'ovh': 'ovh', 'plesk': 'plesk',
+  'wordpress': 'wordpress', 'nginx': 'nginx', 'apache': 'apache', 'docker': 'docker',
+  'kubernetes': 'kubernetes', 'terraform': 'terraform', 'ansible': 'ansible',
+  'jenkins': 'jenkins', 'sonarqube': 'sonarqube', 'elasticsearch': 'elasticsearch',
+  'kibana': 'kibana', 'redis': 'redis', 'postgresql': 'postgresql', 'mysql': 'mysql',
+  'mongodb': 'mongodb', 'influxdb': 'influxdb', 'minio': 'minio', 'synology': 'synology',
+  'qnap': 'qnap', 'pfsense': 'pfsense', 'opnsense': 'opnsense', 'mikrotik': 'mikrotik',
+  'eset': 'eset', 'acronis': 'acronis', 'veeam': 'veeam', 'adobe': 'adobe', 'intranet': null,
 };
 
 function getSimpleIconUrl(name, url) {
   const key = name.toLowerCase().trim();
-  // Check overrides first
   if (key in SI_OVERRIDES) {
     const slug = SI_OVERRIDES[key];
     return slug ? SI_BASE + slug + '/ffffff/1' : null;
   }
-  // Try derived slug from name
   const slug = toSimpleIconSlug(name);
   if (slug.length >= 2) return SI_BASE + slug + '/ffffff/1';
   return null;
@@ -748,11 +554,9 @@ function mkLinkIcon(link) {
   };
 
   if (link.icon) {
-    // Use stored icon (user-confirmed or auto-suggested)
     img.src = link.icon;
     img.onerror = fallbackToFavicon;
   } else {
-    // Auto-resolve on render
     const siUrl = getSimpleIconUrl(link.name, link.url);
     if (siUrl) {
       img.src = siUrl;
@@ -765,7 +569,7 @@ function mkLinkIcon(link) {
 }
 
 // ════════════════════════════════════════════════
-//  RENDER SECTIONS (main area)
+//  RENDER SECTIONS
 // ════════════════════════════════════════════════
 function renderSections() {
   const el = document.getElementById('sectionsEl'); el.innerHTML = '';
@@ -803,7 +607,6 @@ function renderSections() {
 const RSS_PROXY = 'https://api.rss2json.com/v1/api.json?rss_url=';
 const FEED_MAX  = 20;
 
-// Fetch all feeds in parallel, merge and sort by date desc, max 20 items
 async function renderFeedTabs() {
   const tabBar = document.getElementById('feedTabBar');
   const content = document.getElementById('feedContent');
@@ -816,7 +619,6 @@ async function renderFeedTabs() {
 
   setMsg(content, 'feed-empty', t.loadingDots);
 
-  // Fetch all feeds in parallel
   const results = await Promise.all(feeds.map(async feed => {
     if (feedCache[feed.id]) return feedCache[feed.id];
     try {
@@ -835,12 +637,7 @@ async function renderFeedTabs() {
     } catch { return []; }
   }));
 
-  // Merge, sort newest first, cap at 20
-  const all = results
-    .flat()
-    .sort((a, b) => b.pubDate - a.pubDate)
-    .slice(0, FEED_MAX);
-
+  const all = results.flat().sort((a, b) => b.pubDate - a.pubDate).slice(0, FEED_MAX);
   renderFeedRows(all, content);
 }
 
@@ -849,7 +646,7 @@ function renderFeedRows(items, container) {
   const list = document.createElement('div'); list.className = 'feed-list feed-list-scroll';
   items.forEach((item, i) => {
     const row = document.createElement('div'); row.className = 'feed-row';
-    const locale = currentLang === 'es' ? 'es-ES' : 'en-GB';
+    const locale = getLocale();
     const pub = item.pubDate && item.pubDate.getTime() > 0
       ? item.pubDate.toLocaleDateString(locale, { day:'2-digit', month:'short' })
       : '';
@@ -869,11 +666,10 @@ function renderFeedRows(items, container) {
 function refreshFeeds() { feedCache = {}; renderFeedTabs(); }
 
 // ════════════════════════════════════════════════
-//  WEATHER (Open-Meteo — no API key needed)
+//  WEATHER
 // ════════════════════════════════════════════════
 async function loadWeather() {
   try {
-    // Valencia coords
     const res = await fetch('https://api.open-meteo.com/v1/forecast?latitude=39.47&longitude=-0.37&current=temperature_2m,apparent_temperature,relative_humidity_2m,wind_speed_10m,weather_code&wind_speed_unit=kmh');
     const d = await res.json(); const c = d.current;
     const desc = (t.weatherCodes && t.weatherCodes[c.weather_code]) || '';
@@ -893,7 +689,7 @@ async function loadWeather() {
 // ════════════════════════════════════════════════
 function openModal(tab='links') { document.getElementById('modalOverlay').classList.add('open'); switchTab(tab); }
 function closeModal() { document.getElementById('modalOverlay').classList.remove('open'); resetPending(); }
-function resetPending() { pendingSection=null; pendingGroup=null; document.getElementById('addGroupForm').style.display='none'; document.getElementById('addLinkForm').style.display='none'; }
+function resetPending() { pendingSection=null; pendingGroup=null; document.getElementById('addGroupForm').style.display='none'; document.getElementById('addLinkForm').style.display='none'; document.getElementById('editLinkForm').style.display='none'; }
 
 function switchTab(tab) {
   document.querySelectorAll('.modal-tab').forEach(t => t.classList.toggle('active', t.dataset.tab===tab));
@@ -909,7 +705,6 @@ function switchTab(tab) {
   if (tab==='appearance') { renderThemeModal(); renderGradientPresets(); updateWallPreview(wallSettings.type==='image'?wallSettings.src:null); }
 }
 
-// ── Section / Group / Link modal ──
 function makeBtn(cls, text, fn) {
   const b = document.createElement('button'); b.className=cls; b.textContent=text;
   b.addEventListener('click', fn); return b;
@@ -920,17 +715,16 @@ function renderSectionModal() {
   if (!sections.length) { setMsg(list, 'empty-state', t.noSections); return; }
 
   sections.forEach((sec, si) => {
-    // Section card
     const sc = document.createElement('div'); sc.className='item-card'; sc.style.flexDirection='column'; sc.style.alignItems='stretch'; sc.style.gap='8px';
 
     const scHead = document.createElement('div'); scHead.style.cssText='display:flex;align-items:center;gap:9px;';
     const scInfo = document.createElement('div'); scInfo.className='item-card-info';
     const scName = document.createElement('div'); scName.className='item-card-name'; scName.textContent=sec.name;
-    const scSub  = document.createElement('div'); scSub.className='item-card-sub'; scSub.textContent=sec.groups.length+' grupos';
+    const scSub  = document.createElement('div'); scSub.className='item-card-sub'; scSub.textContent=sec.groups.length+' '+t.groups;
     scInfo.appendChild(scName); scInfo.appendChild(scSub);
 
     const scAct = document.createElement('div'); scAct.className='item-card-actions';
-    scAct.appendChild(makeBtn('btn btn-ghost btn-sm', '+ Grupo', () => openAddGroup(sec.id)));
+    scAct.appendChild(makeBtn('btn btn-ghost btn-sm', t.addGroupBtn, () => openAddGroup(sec.id)));
     if (si>0)               scAct.appendChild(makeBtn('btn btn-ghost btn-sm','↑',() => moveSection(sec.id,-1)));
     if (si<sections.length-1) scAct.appendChild(makeBtn('btn btn-ghost btn-sm','↓',() => moveSection(sec.id, 1)));
     scAct.appendChild(makeBtn('btn btn-danger btn-sm','×',() => deleteSection(sec.id)));
@@ -938,7 +732,6 @@ function renderSectionModal() {
     scHead.appendChild(scInfo); scHead.appendChild(scAct);
     sc.appendChild(scHead);
 
-    // Groups inside section
     if (sec.groups.length) {
       const subList = document.createElement('div'); subList.className='modal-sub-list';
       sec.groups.forEach((g, gi) => {
@@ -947,11 +740,11 @@ function renderSectionModal() {
         const gcHead = document.createElement('div'); gcHead.style.cssText='display:flex;align-items:center;gap:8px;';
         const gcInfo = document.createElement('div'); gcInfo.className='item-card-info';
         const gcName = document.createElement('div'); gcName.className='item-card-name'; gcName.style.fontSize='11.5px'; gcName.textContent=g.name;
-        const gcSub  = document.createElement('div'); gcSub.className='item-card-sub'; gcSub.textContent=g.links.length+' links';
+        const gcSub  = document.createElement('div'); gcSub.className='item-card-sub'; gcSub.textContent=g.links.length+' '+t.linksWord;
         gcInfo.appendChild(gcName); gcInfo.appendChild(gcSub);
 
         const gcAct = document.createElement('div'); gcAct.className='item-card-actions';
-        gcAct.appendChild(makeBtn('btn btn-ghost btn-sm','+ Link',() => openAddLink(sec.id, g.id)));
+        gcAct.appendChild(makeBtn('btn btn-ghost btn-sm', t.addLinkBtn,() => openAddLink(sec.id, g.id)));
         if (gi>0)               gcAct.appendChild(makeBtn('btn btn-ghost btn-sm','↑',() => moveGroup(sec.id,g.id,-1)));
         if (gi<sec.groups.length-1) gcAct.appendChild(makeBtn('btn btn-ghost btn-sm','↓',() => moveGroup(sec.id,g.id, 1)));
         gcAct.appendChild(makeBtn('btn btn-danger btn-sm','×',() => deleteGroup(sec.id,g.id)));
@@ -959,7 +752,6 @@ function renderSectionModal() {
         gcHead.appendChild(gcInfo); gcHead.appendChild(gcAct);
         gc.appendChild(gcHead);
 
-        // Links inside group
         if (g.links.length) {
           const lList = document.createElement('div'); lList.style.cssText='display:flex;flex-direction:column;gap:2px;padding-left:10px;';
           g.links.forEach((l, li) => {
@@ -987,13 +779,13 @@ function renderSectionModal() {
   });
 }
 
-// Pending add forms
 function openAddGroup(sectionId) {
   pendingSection = sectionId; pendingGroup = null;
   const sec = sections.find(s => s.id===sectionId);
   document.getElementById('addGroupSectionName').textContent = sec ? sec.name : '';
   document.getElementById('addGroupForm').style.display = 'flex';
   document.getElementById('addLinkForm').style.display  = 'none';
+  document.getElementById('editLinkForm').style.display = 'none';
   document.getElementById('gName').value = '';
   document.getElementById('gName').focus();
 }
@@ -1004,6 +796,7 @@ function openAddLink(sectionId, groupId) {
   document.getElementById('addLinkGroupName').textContent = grp ? grp.name : '';
   document.getElementById('addLinkForm').style.display  = 'flex';
   document.getElementById('addGroupForm').style.display = 'none';
+  document.getElementById('editLinkForm').style.display = 'none';
   document.getElementById('lName').value = '';
   document.getElementById('lUrl').value  = '';
   document.getElementById('lIcon').value = '';
@@ -1011,7 +804,6 @@ function openAddLink(sectionId, groupId) {
   document.getElementById('lName').focus();
 }
 
-// ── Icon preview helpers ──
 let _iconDebounce = null;
 function updateIconPreview(url) {
   const img  = document.getElementById('iconPreviewImg');
@@ -1030,9 +822,7 @@ function suggestIcon() {
   const name = document.getElementById('lName').value.trim();
   const url  = document.getElementById('lUrl').value.trim();
   const customIcon = document.getElementById('lIcon').value.trim();
-  // Don't override if user has manually set an icon
   if (customIcon) { updateIconPreview(customIcon); return; }
-  // Build suggestion
   let suggested = '';
   if (name) {
     const siUrl = getSimpleIconUrl(name, url);
@@ -1048,7 +838,6 @@ function suggestIcon() {
   updateIconPreview(suggested);
 }
 
-// CRUD
 function addSection() {
   const name = document.getElementById('sName').value.trim(); if (!name) { alert(t.alertAddSection); return; }
   sections.push({ id:uid(), name, groups:[] });
@@ -1105,7 +894,6 @@ function moveLink(sectionId, groupId, linkId, dir) {
   [grp.links[i],grp.links[ni]]=[grp.links[ni],grp.links[i]]; save(); renderSections(); renderSectionModal();
 }
 
-// ── Feed modal ──
 function renderFeedModal() {
   const list = document.getElementById('feedItemList'); list.innerHTML='';
   if (!feeds.length) { setMsg(list, 'empty-state', t.noFeeds); return; }
@@ -1187,8 +975,6 @@ function syncSlidersToState(ws) {
   set('slBlur',   ws.blur??0,     'lblBlur',   'px');
   set('slTint',   ws.tint??0,     'lblTint',   '°');
   set('slGlass',  ws.glass??18,   'lblGlass',  'px');
-  const qb=document.getElementById('quickBlur'); if(qb)qb.value=ws.blur??0;
-  const qd=document.getElementById('quickDim');  if(qd)qd.value=ws.dim??45;
 }
 function onWallSlider(prop,rawVal) {
   const val=parseFloat(rawVal);
@@ -1196,8 +982,6 @@ function onWallSlider(prop,rawVal) {
   const sfxs  ={opacity:'%',dim:'%',blur:'px',tint:'°',glass:'px'};
   const lb=document.getElementById(labels[prop]); if(lb)lb.textContent=val+sfxs[prop];
   wallSettings[prop]=val; applyWallSettings(wallSettings); saveWall();
-  if(prop==='blur'){const q=document.getElementById('quickBlur');if(q)q.value=val;}
-  if(prop==='dim') {const q=document.getElementById('quickDim'); if(q)q.value=val;}
 }
 
 function applyWallUrl(url, persist=true) {
@@ -1225,7 +1009,7 @@ function removeWallpaper() { wallSettings={...DEFAULT_WALL}; applyWallSettings(w
 function resetWallSettings() { const {src,type,grad}=wallSettings; wallSettings={...DEFAULT_WALL,src,type,grad}; applyWallSettings(wallSettings); saveWall(); }
 function renderGradientPresets() {
   const wrap=document.getElementById('wallPresets'); if(!wrap)return; wrap.innerHTML='';
-  const none=document.createElement('div'); none.className='wall-preset wall-preset-none'+(wallSettings.type==='none'?' active':''); none.textContent='Sin fondo';
+  const none=document.createElement('div'); none.className='wall-preset wall-preset-none'+(wallSettings.type==='none'?' active':''); none.textContent=t.noBackground;
   none.addEventListener('click',removeWallpaper); wrap.appendChild(none);
   GRADIENT_PRESETS.forEach(p => {
     const d=document.createElement('div'); d.className='wall-preset'+(wallSettings.grad===p.grad?' active':''); d.style.background=p.grad; d.title=p.label;
@@ -1234,9 +1018,8 @@ function renderGradientPresets() {
   });
 }
 
-
 // ════════════════════════════════════════════════
-//  MARKETS — CoinGecko free API
+//  MARKETS
 // ════════════════════════════════════════════════
 async function loadMarkets() {
   const el = document.getElementById('marketsList');
@@ -1269,10 +1052,10 @@ function renderMarkets(data) {
     if (info) {
       const price = info.eur;
       val.textContent = price >= 1000
-        ? '€' + price.toLocaleString('es-ES', {maximumFractionDigits:0})
+        ? '€' + price.toLocaleString(getLocale(), {maximumFractionDigits:0})
         : price >= 1
-        ? '€' + price.toLocaleString('es-ES', {minimumFractionDigits:2, maximumFractionDigits:4})
-        : '€' + price.toLocaleString('es-ES', {minimumFractionDigits:4, maximumFractionDigits:6});
+        ? '€' + price.toLocaleString(getLocale(), {minimumFractionDigits:2, maximumFractionDigits:4})
+        : '€' + price.toLocaleString(getLocale(), {minimumFractionDigits:4, maximumFractionDigits:6});
       const pct = info.eur_24h_change;
       chg.textContent = (pct >= 0 ? '+' : '') + pct.toFixed(2) + '%';
       chg.classList.add(pct >= 0 ? 'up' : 'dn');
@@ -1285,7 +1068,6 @@ function renderMarkets(data) {
   });
 }
 
-// Markets modal
 function renderMarketModal() {
   const list = document.getElementById('marketItemList'); list.innerHTML = '';
   if (!markets.length) { setMsg(list, 'empty-state', t.noAssets); return; }
@@ -1335,7 +1117,7 @@ function toggleMarketPresets() {
   if (!open) {
     const grid = document.getElementById('marketPresetGrid'); grid.innerHTML = '';
     MARKET_PRESETS.forEach(p => {
-      if (markets.find(m => m.id === p.id)) return; // already added
+      if (markets.find(m => m.id === p.id)) return;
       const b = document.createElement('button'); b.className = 'btn btn-ghost btn-sm';
       b.textContent = p.symbol + ' ' + p.name;
       b.addEventListener('click', () => {
@@ -1348,14 +1130,11 @@ function toggleMarketPresets() {
   }
 }
 
-
 // ════════════════════════════════════════════════
-//  CALENDAR — lunes como primer día
+//  CALENDAR
 // ════════════════════════════════════════════════
-const DOW_ES    = ['Lu','Ma','Mi','Ju','Vi','Sá','Do'];
-
 let calYear  = new Date().getFullYear();
-let calMonth = new Date().getMonth(); // 0-indexed
+let calMonth = new Date().getMonth();
 
 function renderCalendar() {
   const grid  = document.getElementById('calGrid');
@@ -1367,48 +1146,37 @@ function renderCalendar() {
   const today = new Date();
   const todayY = today.getFullYear(), todayM = today.getMonth(), todayD = today.getDate();
 
-  // First day of displayed month
   const first = new Date(calYear, calMonth, 1);
-  // getDay(): 0=Sun,1=Mon…6=Sat → convert to Mon-based: Mon=0…Sun=6
-  // For EN: Sunday=0, Mon=1…; for ES: Monday=0, Tue=1…
   const mondayFirst = currentLang !== 'en';
   let startDow = mondayFirst ? (first.getDay() + 6) % 7 : first.getDay();
 
-  // Days in this month and previous
   const daysInMonth = new Date(calYear, calMonth + 1, 0).getDate();
   const daysInPrev  = new Date(calYear, calMonth,     0).getDate();
 
-  // Build DOW header
   const dowRow = document.createElement('div'); dowRow.className = 'cal-dow-row';
-  // Week starts on Monday (ES) or Sunday (EN)
   const dowOrder = currentLang === 'en'
-    ? [...t.dow.slice(6), ...t.dow.slice(0,6)]   // Sun first
-    : t.dow;                                       // Mon first
+    ? [...t.dow.slice(6), ...t.dow.slice(0,6)]
+    : t.dow;
   dowOrder.forEach(d => {
     const cell = document.createElement('div'); cell.className = 'cal-dow'; cell.textContent = d;
     dowRow.appendChild(cell);
   });
 
-  // Build days grid
   const daysGrid = document.createElement('div'); daysGrid.className = 'cal-days-grid';
 
-  // Prev month tail
   for (let i = startDow - 1; i >= 0; i--) {
-    const cell = mkCalDay(daysInPrev - i, true, false, false);
-    daysGrid.appendChild(cell);
+    daysGrid.appendChild(mkCalDay(daysInPrev - i, true, false, false));
   }
 
-  // Current month
   for (let d = 1; d <= daysInMonth; d++) {
     const isToday   = (calYear===todayY && calMonth===todayM && d===todayD);
     const dayOfWeek = new Date(calYear, calMonth, d).getDay();
     const isWeekend = mondayFirst
-      ? ((dayOfWeek + 6) % 7) >= 5   // Mon-based: Sa=5,Su=6
-      : dayOfWeek === 0 || dayOfWeek === 6; // Sun-based: Su=0,Sa=6
+      ? ((dayOfWeek + 6) % 7) >= 5
+      : dayOfWeek === 0 || dayOfWeek === 6;
     daysGrid.appendChild(mkCalDay(d, false, isToday, isWeekend));
   }
 
-  // Next month head to fill 6 rows × 7 = 42 cells max
   const filled = startDow + daysInMonth;
   const remaining = filled % 7 === 0 ? 0 : 7 - (filled % 7);
   for (let d = 1; d <= remaining; d++) {
@@ -1430,23 +1198,20 @@ function mkCalDay(num, otherMonth, isToday, isWeekend) {
   return cell;
 }
 
-
 // ════════════════════════════════════════════════
-//  YOUTUBE VIDEOS via RSS (no API key needed)
+//  YOUTUBE VIDEOS
 // ════════════════════════════════════════════════
 const YT_RSS = 'https://www.youtube.com/feeds/videos.xml?channel_id=';
-const handleCache = {}; // @handle → channelId
+const handleCache = {};
 
 async function resolveYouTubeHandle(handle) {
   const key = handle.toLowerCase();
   if (handleCache[key]) return handleCache[key];
   try {
-    // Fetch the channel page — it contains the channelId in a meta tag
     const url = 'https://www.youtube.com/' + handle;
     const res = await fetch(url, { signal: AbortSignal.timeout(10000) });
     if (!res.ok) throw new Error('http ' + res.status);
     const html = await res.text();
-    // Look for channelId in various places YouTube embeds it
     const patterns = [
       /"channelId":"(UC[a-zA-Z0-9_-]{22})"/,
       /\"channelId\":\"(UC[a-zA-Z0-9_-]{22})\"/,
@@ -1457,11 +1222,10 @@ async function resolveYouTubeHandle(handle) {
       const m = html.match(pattern);
       if (m && m[1]) {
         handleCache[key] = m[1];
-        console.log('Resolved', handle, '→', m[1]);
         return m[1];
       }
     }
-    throw new Error('Channel ID not found in page');
+    throw new Error('Channel ID not found');
   } catch(e) {
     console.warn('Could not resolve YouTube handle', handle, ':', e.message);
     return null;
@@ -1473,7 +1237,7 @@ function timeAgo(dateStr) {
   if (diff < 3600)   return Math.floor(diff/60)  + 'm';
   if (diff < 86400)  return Math.floor(diff/3600) + 'h';
   if (diff < 604800) return Math.floor(diff/86400)+ 'd';
-  return Math.floor(diff/604800) + 'sem';
+  return Math.floor(diff/604800) + t.weekShort;
 }
 
 function parseYouTubeXml(xml, ch) {
@@ -1496,16 +1260,12 @@ function parseYouTubeXml(xml, ch) {
   return items;
 }
 
-// Extract videos from YouTube channel page HTML (ytInitialData JSON)
 function parseYouTubePageVideos(html, ch) {
   try {
-    // YouTube embeds all video data as ytInitialData JSON in the page
     const match = html.match(/var ytInitialData\s*=\s*(\{.+?\});\s*<\/script>/s)
       || html.match(/ytInitialData\s*=\s*(\{.+?\});\s*(?:var|window|<\/script>)/s);
     if (!match) return [];
     const data = JSON.parse(match[1]);
-
-    // Navigate the deeply nested structure to find video renderers
     const videos = [];
     function findVideos(obj) {
       if (!obj || typeof obj !== 'object' || videos.length >= (ch.count || 5)) return;
@@ -1516,7 +1276,6 @@ function parseYouTubePageVideos(html, ch) {
         const title = r.title?.runs?.[0]?.text || r.title?.simpleText || '';
         const thumb = 'https://i.ytimg.com/vi/' + videoId + '/mqdefault.jpg';
         const link  = 'https://www.youtube.com/watch?v=' + videoId;
-        // Published text like "hace 2 días" — use now as approx date
         const pubText = r.publishedTimeText?.simpleText || '';
         const pubDate = estimatePubDate(pubText);
         if (title) videos.push({ title, link, thumb, pubDate, channel: ch.name });
@@ -1529,7 +1288,6 @@ function parseYouTubePageVideos(html, ch) {
     videoCache[ch.id] = videos;
     return videos;
   } catch(e) {
-    console.warn('ytInitialData parse error:', e.message);
     return [];
   }
 }
@@ -1539,13 +1297,13 @@ function estimatePubDate(text) {
   const now = Date.now();
   const t = text.toLowerCase();
   const n = parseInt(t) || 1;
-  if (t.includes('seg') || t.includes('second')) return new Date(now - n * 1000);
-  if (t.includes('min'))                          return new Date(now - n * 60000);
-  if (t.includes('hora') || t.includes('hour'))  return new Date(now - n * 3600000);
-  if (t.includes('día') || t.includes('day'))    return new Date(now - n * 86400000);
-  if (t.includes('sem') || t.includes('week'))   return new Date(now - n * 604800000);
-  if (t.includes('mes') || t.includes('month'))  return new Date(now - n * 2592000000);
-  if (t.includes('año') || t.includes('year'))   return new Date(now - n * 31536000000);
+  if (t.includes('seg') || t.includes('second') || t.includes('сек')) return new Date(now - n * 1000);
+  if (t.includes('min') || t.includes('мин')) return new Date(now - n * 60000);
+  if (t.includes('hora') || t.includes('hour') || t.includes('час')) return new Date(now - n * 3600000);
+  if (t.includes('día') || t.includes('day') || t.includes('дн') || t.includes('день')) return new Date(now - n * 86400000);
+  if (t.includes('sem') || t.includes('week') || t.includes('нед')) return new Date(now - n * 604800000);
+  if (t.includes('mes') || t.includes('month') || t.includes('мес')) return new Date(now - n * 2592000000);
+  if (t.includes('año') || t.includes('year') || t.includes('год')) return new Date(now - n * 31536000000);
   return new Date(0);
 }
 
@@ -1556,24 +1314,18 @@ async function loadVideos(force=false) {
   if (section) section.style.display = 'flex';
   { const lv = document.createElement('div'); lv.className='feed-empty'; lv.style.padding='16px 0'; lv.textContent=t.loadingVideos; el.textContent=''; el.appendChild(lv); }
 
-  // Fetch all channels in parallel — parse YouTube XML feed directly
   const fetches = channels.map(async ch => {
     if (!force && videoCache[ch.id]) return videoCache[ch.id];
     try {
-      // Resolve @handle to channel ID if needed
       let channelId = ch.id;
       if (channelId.startsWith('@')) {
         channelId = await resolveYouTubeHandle(channelId);
         if (!channelId) throw new Error('Could not resolve handle ' + ch.id);
-        // Cache resolved ID back
         const idx = channels.findIndex(c => c.id === ch.id);
         if (idx >= 0) { channels[idx].id = channelId; saveChannels(); }
       }
 
-      // Fetch YouTube XML feed directly — extension has <all_urls> permission, no proxy needed
       const feedUrl = YT_RSS + channelId;
-
-      // Strategy 1: Direct RSS feed
       const res = await fetch(feedUrl, {
         signal: AbortSignal.timeout(10000),
         headers: { 'Accept': 'application/atom+xml, application/xml, text/xml, */*' }
@@ -1581,16 +1333,12 @@ async function loadVideos(force=false) {
 
       if (res.ok) {
         const text = await res.text();
-
-        // Parse XML — YouTube Atom feed uses yt: namespace
         const parser = new DOMParser();
         const xml = parser.parseFromString(text, 'application/xml');
         if (xml.querySelector('parsererror')) throw new Error('xml parse error');
         return parseYouTubeXml(xml, ch);
       }
 
-      // Strategy 2: Fetch channel page and scrape ytInitialData
-      console.log('RSS feed 404 for', channelId, '— trying channel page scrape');
       const pageUrl = 'https://www.youtube.com/channel/' + channelId + '/videos';
       const pageRes = await fetch(pageUrl, {
         signal: AbortSignal.timeout(12000),
@@ -1602,11 +1350,9 @@ async function loadVideos(force=false) {
       if (!pageRes.ok) throw new Error('page http ' + pageRes.status);
       const pageHtml = await pageRes.text();
 
-      // Try extracting from ytInitialData
       const scraped = parseYouTubePageVideos(pageHtml, ch);
       if (scraped.length > 0) return scraped;
 
-      // Strategy 3: extract RSS URL embedded in page <link> tag
       const rssMatch = pageHtml.match(/feeds\/videos\.xml\?channel_id=[^"&]+/);
       if (rssMatch) {
         const rssRes = await fetch('https://www.youtube.com/' + rssMatch[0], { signal: AbortSignal.timeout(10000) });
@@ -1617,39 +1363,22 @@ async function loadVideos(force=false) {
         }
       }
 
-      throw new Error('all strategies failed for ' + channelId);
+      throw new Error('all strategies failed');
     } catch(e) {
       console.warn('Video feed error for channel', ch.id, ':', e.message);
-      // If 404, the channel ID is likely wrong
-      if (e.message.includes('404')) {
-        console.warn('→ Channel ID "' + ch.id + '" returned 404. Please verify it is correct.');
-      }
       return [];
     }
   });
 
   const results = await Promise.all(fetches);
-
-  // Merge, sort by date desc
-  const all = results
-    .flat()
-    .sort((a, b) => b.pubDate - a.pubDate)
-    .map(v => ({ ...v, age: timeAgo(v.pubDate) }));
-
+  const all = results.flat().sort((a, b) => b.pubDate - a.pubDate).map(v => ({ ...v, age: timeAgo(v.pubDate) }));
   renderAllVideos(all, el);
-}
-
-function extractThumb(item) {
-  if (item.enclosure && item.enclosure.link) return item.enclosure.link;
-  const m = (item.link||'').match(/v=([^&]+)/);
-  if (m) return 'https://i.ytimg.com/vi/'+m[1]+'/mqdefault.jpg';
-  return '';
 }
 
 function renderAllVideos(items, container) {
   container.innerHTML = '';
   if (!items.length) {
-    { const nv = document.createElement('div'); nv.className='feed-empty'; nv.style.padding='16px 0'; nv.textContent=t.noVideos; container.textContent=''; container.appendChild(nv); }
+    const nv = document.createElement('div'); nv.className='feed-empty'; nv.style.padding='16px 0'; nv.textContent=t.noVideos; container.appendChild(nv);
     return;
   }
 
@@ -1657,27 +1386,20 @@ function renderAllVideos(items, container) {
 
   items.forEach(v => {
     const card = document.createElement('a'); card.className='video-card'; card.href=v.link; card.target='_blank';
-
-    // Thumbnail
     const wrap = document.createElement('div'); wrap.className='video-thumb-wrap';
     if (v.thumb) {
       const img = document.createElement('img'); img.className='video-thumb'; img.src=v.thumb; img.alt='';
       img.onerror = () => { img.style.display='none'; };
       wrap.appendChild(img);
     }
-    // Play overlay
     const ov = document.createElement('div'); ov.className='video-play-overlay';
     const pi = document.createElement('div'); pi.className='video-play-icon';
     pi.appendChild(mkSvgIcon('M8 5v14l11-7z'));
     ov.appendChild(pi); wrap.appendChild(ov);
-    // Age + channel badge
     const ag = document.createElement('div'); ag.className='video-age';
     ag.textContent = v.age + (v.channel ? ' · ' + v.channel : '');
     wrap.appendChild(ag);
-
-    // Title
     const title = document.createElement('div'); title.className='video-title'; title.textContent=v.title;
-
     card.appendChild(wrap); card.appendChild(title);
     row.appendChild(card);
   });
@@ -1685,7 +1407,6 @@ function renderAllVideos(items, container) {
   container.appendChild(row);
 }
 
-// Videos modal
 function renderVideoChannelModal() {
   const list = document.getElementById('videoChannelList'); list.innerHTML='';
   if (!channels.length) { setMsg(list, 'empty-state', t.noChannels); return; }
@@ -1693,7 +1414,7 @@ function renderVideoChannelModal() {
     const card = document.createElement('div'); card.className='item-card';
     const info = document.createElement('div'); info.className='item-card-info';
     const nm = document.createElement('div'); nm.className='item-card-name'; nm.textContent=ch.name;
-    const sb = document.createElement('div'); sb.className='item-card-sub'; sb.textContent='ID: '+ch.id+' · '+ch.count+' vídeos';
+    const sb = document.createElement('div'); sb.className='item-card-sub'; sb.textContent='ID: '+ch.id+' · '+ch.count+' '+t.videos.toLowerCase();
     info.appendChild(nm); info.appendChild(sb);
     const acts = document.createElement('div'); acts.className='item-card-actions';
     if (i>0)             acts.appendChild(makeBtn('btn btn-ghost btn-sm','↑',()=>moveChannel(ch.id,-1)));
@@ -1706,7 +1427,7 @@ function renderVideoChannelModal() {
 
 function addChannel() {
   const id    = document.getElementById('vChannelId').value.trim();
-  const name  = document.getElementById('vChannelName').value.trim() || 'Canal';
+  const name  = document.getElementById('vChannelName').value.trim() || 'Channel';
   const count = parseInt(document.getElementById('vCount').value) || 5;
   if (!id) { alert(t.alertFillChannel); return; }
   if (channels.find(c => c.id===id)) { alert(t.alertChannelExists); return; }
@@ -1730,7 +1451,6 @@ function moveChannel(id, dir) {
   saveChannels(); renderVideoChannelModal(); videoCache={}; loadVideos();
 }
 
-
 // ════════════════════════════════════════════════
 //  EXPORT / IMPORT
 // ════════════════════════════════════════════════
@@ -1743,13 +1463,9 @@ function exportConfig() {
     fontsize: currentFontSize,
     uptime:   uptimeConfig,
     exported: new Date().toISOString(),
-    sections,
-    feeds,
-    markets,
-    channels,
-    wall:     { ...wallSettings, src: null }, // skip image URL if any — user can re-add
+    sections, feeds, markets, channels,
+    wall:     { ...wallSettings, src: null },
   };
-  // Include wall src only if it's a URL (not base64)
   if (wallSettings.src && wallSettings.src.startsWith('http')) {
     config.wall.src = wallSettings.src;
   }
@@ -1768,13 +1484,11 @@ function importConfig(file) {
   reader.onload = async e => {
     try {
       const config = JSON.parse(e.target.result);
-      // Validate minimally
       if (!config.sections && !config.feeds && !config.markets) {
         alert(t.alertInvalidFile);
         return;
       }
-      const locale = currentLang === 'es' ? 'es-ES' : 'en-GB';
-      const exportDate = config.exported ? new Date(config.exported).toLocaleDateString(locale) : '?';
+      const exportDate = config.exported ? new Date(config.exported).toLocaleDateString(getLocale()) : '?';
       const ok = confirm(
         t.importConfirmTitle + ' ' + exportDate + '?\n\n' +
         '• ' + (config.sections?.length || 0) + ' ' + t.importConfirmSections + '\n' +
@@ -1796,14 +1510,12 @@ function importConfig(file) {
       if (config.uptime)   { uptimeConfig = config.uptime; await Store.set('gd_uptime', uptimeConfig); loadUptime(true); }
       if (config.wall)     { wallSettings = { ...DEFAULT_WALL, ...config.wall }; await Store.set('gd_wall', wallSettings); applyWallSettings(wallSettings); }
 
-      // Re-render everything
       renderSections();
       renderFeedTabs();
       renderCalendar();
       videoCache = {}; loadVideos();
       loadMarkets();
 
-      // Refresh modal tab if open
       const activeTab = document.querySelector('.modal-tab.active');
       if (activeTab) switchTab(activeTab.dataset.tab);
 
@@ -1815,7 +1527,6 @@ function importConfig(file) {
   };
   reader.readAsText(file);
 }
-
 
 // ════════════════════════════════════════════════
 //  SEARCH ENGINE MODAL
@@ -1837,8 +1548,6 @@ function renderEngineModal() {
   });
 }
 
-
-
 // ════════════════════════════════════════════════
 //  FONT SIZE
 // ════════════════════════════════════════════════
@@ -1851,7 +1560,6 @@ function applyFontSize(size, save=true) {
   FONT_SIZES.forEach(s => document.body.classList.remove('font-' + s));
   document.body.classList.add('font-' + size);
   if (save) Store.set('gd_fontsize', size);
-  // Update button states (works whenever modal is open)
   document.querySelectorAll('.font-size-btn').forEach(btn => {
     btn.classList.toggle('active', btn.dataset.size === size);
   });
@@ -1861,12 +1569,12 @@ function applyFontSize(size, save=true) {
 //  THEMES
 // ════════════════════════════════════════════════
 const THEMES = [
-  { id:'obsidian',  name:'Obsidian',      desc_es:'Oscuro neutro · acento dorado',  desc_en:'Dark neutral · golden accent',   accent:'#c8b89a', bg:'#0a0a0c' },
-  { id:'midnight',  name:'Midnight Blue', desc_es:'Azul profundo · acento celeste',  desc_en:'Deep blue · sky accent',         accent:'#7eb8e8', bg:'#050c16' },
-  { id:'forest',    name:'Forest',        desc_es:'Verde oscuro · acento esmeralda', desc_en:'Dark green · emerald accent',    accent:'#6dbf8a', bg:'#08100c' },
-  { id:'aurora',    name:'Aurora',        desc_es:'Violeta oscuro · acento lavanda', desc_en:'Dark violet · lavender accent',  accent:'#c48de0', bg:'#100812' },
-  { id:'ember',     name:'Ember',         desc_es:'Marrón cálido · acento ámbar',   desc_en:'Warm brown · amber accent',      accent:'#e89a6a', bg:'#120a06' },
-  { id:'arctic',    name:'Arctic',        desc_es:'Azul glacial · acento cian',      desc_en:'Glacial blue · cyan accent',     accent:'#6ab8c8', bg:'#060e12' },
+  { id:'obsidian',  name:'Obsidian',      desc_es:'Oscuro neutro · acento dorado',  desc_en:'Dark neutral · golden accent',   desc_ru:'Тёмный нейтральный · золотой акцент', accent:'#c8b89a', bg:'#0a0a0c' },
+  { id:'midnight',  name:'Midnight Blue', desc_es:'Azul profundo · acento celeste',  desc_en:'Deep blue · sky accent',         desc_ru:'Глубокий синий · небесный акцент', accent:'#7eb8e8', bg:'#050c16' },
+  { id:'forest',    name:'Forest',        desc_es:'Verde oscuro · acento esmeralda', desc_en:'Dark green · emerald accent',    desc_ru:'Тёмно-зелёный · изумрудный акцент', accent:'#6dbf8a', bg:'#08100c' },
+  { id:'aurora',    name:'Aurora',        desc_es:'Violeta oscuro · acento lavanda', desc_en:'Dark violet · lavender accent',  desc_ru:'Тёмно-фиолетовый · лавандовый акцент', accent:'#c48de0', bg:'#100812' },
+  { id:'ember',     name:'Ember',         desc_es:'Marrón cálido · acento ámbar',   desc_en:'Warm brown · amber accent',      desc_ru:'Тёплый коричневый · янтарный акцент', accent:'#e89a6a', bg:'#120a06' },
+  { id:'arctic',    name:'Arctic',        desc_es:'Azul glacial · acento cian',      desc_en:'Glacial blue · cyan accent',     desc_ru:'Ледниковый синий · голубой акцент', accent:'#6ab8c8', bg:'#060e12' },
 ];
 
 let currentTheme = 'obsidian';
@@ -1887,21 +1595,18 @@ function renderThemeModal() {
     row.style.cssText = 'display:flex;align-items:center;gap:12px;padding:10px 13px;border-radius:10px;border:1px solid var(--glass-border);background:rgba(255,255,255,0.03);cursor:pointer;transition:all 0.13s;';
     if (th.id === currentTheme) row.style.borderColor = th.accent + '66';
 
-    // Color dot
     const dot = document.createElement('div');
     dot.style.cssText = 'width:32px;height:32px;border-radius:50%;flex-shrink:0;border:2px solid ' + th.accent + '44;';
     dot.style.background = 'radial-gradient(circle at 35% 35%, ' + th.accent + '44 0%, ' + th.bg + ' 100%)';
     dot.style.boxShadow = '0 0 8px ' + th.accent + '33';
 
-    // Info
     const info = document.createElement('div'); info.style.flex = '1';
     const nm = document.createElement('div'); nm.style.cssText = 'font-size:13px;color:var(--text-primary);';
     nm.textContent = th.name;
     const ds = document.createElement('div'); ds.style.cssText = 'font-size:10.5px;color:var(--text-muted);margin-top:2px;';
-    ds.textContent = currentLang === 'es' ? th.desc_es : th.desc_en;
+    ds.textContent = currentLang === 'ru' ? th.desc_ru : (currentLang === 'es' ? th.desc_es : th.desc_en);
     info.appendChild(nm); info.appendChild(ds);
 
-    // Check
     const check = document.createElement('div'); check.className = 'engine-check';
     check.textContent = th.id === currentTheme ? '✓' : '';
     check.style.color = th.accent;
@@ -1914,9 +1619,8 @@ function renderThemeModal() {
   });
 }
 
-
 // ════════════════════════════════════════════════
-//  UPTIME KUMA — Status Page API
+//  UPTIME KUMA
 // ════════════════════════════════════════════════
 async function loadUptime(force = false) {
   const section = document.getElementById('uptimeSection');
@@ -1934,7 +1638,6 @@ async function loadUptime(force = false) {
     const base = uptimeConfig.url.replace(/\/$/, '');
     const slug = uptimeConfig.slug;
 
-    // Fetch status page info + heartbeat data in parallel
     const [pageRes, beatRes] = await Promise.all([
       fetch(base + '/api/status-page/' + slug, { signal: AbortSignal.timeout(8000) }),
       fetch(base + '/api/status-page/heartbeat/' + slug, { signal: AbortSignal.timeout(8000) }),
@@ -1951,7 +1654,6 @@ async function loadUptime(force = false) {
     setGlobalDot('unknown');
     const lbl = document.getElementById('uptimeGlobalLabel');
     if (lbl) lbl.textContent = t.uptimeError;
-    // Fail silently — hide section after 5s if persistent error
     setTimeout(() => {
       if (document.getElementById('uptimeGlobalLabel')?.textContent === t.uptimeError) {
         if (section) section.style.display = 'none';
@@ -1988,12 +1690,10 @@ function setGlobalDot(state) {
 
 function renderUptimeGrid(pageData, beatData, container) {
   container.innerHTML = '';
-
   const groups = pageData.publicGroupList || [];
   let totalUp = 0, totalAll = 0;
 
   groups.forEach(group => {
-    // Group label (only if >1 group)
     if (groups.length > 1) {
       const gl = document.createElement('div');
       gl.className = 'uptime-group-label';
@@ -2004,11 +1704,8 @@ function renderUptimeGrid(pageData, beatData, container) {
     (group.monitorList || []).forEach(monitor => {
       const id   = monitor.id;
       const beat = beatData.heartbeatList?.[id] || [];
-      const up   = beatData.uptimeList?.[id + '_24'] ?? null;
-
-      // Determine current status from latest heartbeat
       const latest = beat[beat.length - 1];
-      const status  = latest?.status ?? 3; // 0=down,1=up,2=pending,3=unknown
+      const status  = latest?.status ?? 3;
       const ping    = latest?.ping ?? null;
 
       totalAll++;
@@ -2017,7 +1714,6 @@ function renderUptimeGrid(pageData, beatData, container) {
       const row = document.createElement('div');
       row.className = 'uptime-row' + (status === 0 ? ' down' : '');
 
-      // ── Line 1: dot · name · ping · status badge ──
       const line1 = document.createElement('div');
       line1.style.cssText = 'display:flex;align-items:center;gap:6px;width:100%;';
 
@@ -2037,7 +1733,6 @@ function renderUptimeGrid(pageData, beatData, container) {
 
       line1.appendChild(dot); line1.appendChild(name); line1.appendChild(pingEl);
 
-      // ── Line 2: mini bar chart (last 30 beats) ──
       const line2 = document.createElement('div');
       line2.className = 'uptime-bars';
 
@@ -2065,14 +1760,12 @@ function renderUptimeGrid(pageData, beatData, container) {
     });
   });
 
-  // Set global status
   if (totalAll === 0)         setGlobalDot('unknown');
   else if (totalUp === totalAll) setGlobalDot('up');
   else if (totalUp === 0)     setGlobalDot('down');
   else                        setGlobalDot('partial');
 }
 
-// Uptime modal
 function renderUptimeModal() {
   const urlInput  = document.getElementById('ukUrl');
   const slugInput = document.getElementById('ukSlug');
@@ -2100,7 +1793,7 @@ async function saveUptimeConfig() {
     const data = await res.json();
     const monitors = (data.publicGroupList || []).reduce((n, g) => n + (g.monitorList?.length || 0), 0);
     if (result) {
-      result.textContent = '✓ ' + monitors + ' monitores encontrados';
+      result.textContent = '✓ ' + monitors + ' ' + t.monitorsFound;
       result.style.color = 'var(--green)';
     }
     uptimeConfig = { url, slug };
@@ -2123,8 +1816,6 @@ async function removeUptimeConfig() {
   const result = document.getElementById('uptimeTestResult');
   if (result) { result.textContent = t.remove + ' ✓'; result.style.color = 'var(--text-muted)'; }
 }
-
-
 
 // ════════════════════════════════════════════════
 //  EDIT LINK
@@ -2188,8 +1879,6 @@ function updateEditIconPreview(url) {
 // ════════════════════════════════════════════════
 //  ABOUT
 // ════════════════════════════════════════════════
-// Fallback only for when the page is opened outside the extension context
-// (e.g. dashboard.html served as a plain file). The real source of truth is manifest.json.
 const APP_VERSION_FALLBACK = '1.8.3';
 
 function getAppVersion() {
@@ -2224,14 +1913,11 @@ document.addEventListener('keydown', e => {
 });
 
 // ════════════════════════════════════════════════
-//  WIRE UP ALL EVENT LISTENERS (no inline handlers)
+//  WIRE UP
 // ════════════════════════════════════════════════
 document.addEventListener('DOMContentLoaded', () => {
-  // Gear button
   document.getElementById('gearBtn').addEventListener('click', ()=>openModal('links'));
-  // Sidebar feeds refresh
   document.getElementById('btnRefreshFeeds').addEventListener('click', refreshFeeds);
-  // Modal
   document.getElementById('modalOverlay').addEventListener('click', e=>{ if(e.target.id==='modalOverlay')closeModal(); });
   document.getElementById('modalClose').addEventListener('click', closeModal);
   document.getElementById('btnModalFooterClose').addEventListener('click', closeModal);
@@ -2239,12 +1925,10 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('btnImport').addEventListener('click', () => document.getElementById('importFileInput').click());
   document.getElementById('importFileInput').addEventListener('change', e => { importConfig(e.target.files[0]); e.target.value=''; });
   document.querySelectorAll('.modal-tab').forEach(t=>t.addEventListener('click',()=>switchTab(t.dataset.tab)));
-  // Links tab
   document.getElementById('btnAddSection').addEventListener('click', addSection);
   document.getElementById('btnAddGroup').addEventListener('click', addGroup);
   document.getElementById('btnCancelGroup').addEventListener('click', ()=>{ document.getElementById('addGroupForm').style.display='none'; pendingSection=null; });
   document.getElementById('btnAddLink').addEventListener('click', addLink);
-  // Icon picker live preview
   document.getElementById('lName').addEventListener('input', () => { clearTimeout(_iconDebounce); _iconDebounce = setTimeout(suggestIcon, 350); });
   document.getElementById('lUrl').addEventListener('input',  () => { clearTimeout(_iconDebounce); _iconDebounce = setTimeout(suggestIcon, 350); });
   document.getElementById('lIcon').addEventListener('input', e => updateIconPreview(e.target.value.trim()));
@@ -2260,21 +1944,17 @@ document.addEventListener('DOMContentLoaded', () => {
       if (si) { document.getElementById('elIcon').value = si; updateEditIconPreview(si); }
     }, 350);
   });
-  // Feeds tab
   document.getElementById('btnAddFeed').addEventListener('click', addFeed);
   document.getElementById('btnTogglePresets').addEventListener('click', togglePresets);
-  // Calendar
   document.getElementById('calPrev').addEventListener('click', () => {
     calMonth--; if (calMonth < 0) { calMonth = 11; calYear--; } renderCalendar();
   });
   document.getElementById('calNext').addEventListener('click', () => {
     calMonth++; if (calMonth > 11) { calMonth = 0; calYear++; } renderCalendar();
   });
-  // Videos tab
   document.getElementById('btnManageVideos').addEventListener('click',  ()=>openModal('videos'));
   document.getElementById('btnRefreshVideos').addEventListener('click', ()=>{ videoCache={}; loadVideos(true); });
   document.getElementById('btnAddChannel').addEventListener('click', addChannel);
-  // Markets tab
   document.getElementById('btnManageUptime').addEventListener('click', () => openModal('uptime'));
   document.getElementById('btnRefreshUptime').addEventListener('click', () => loadUptime(true));
   document.getElementById('btnSaveUptime').addEventListener('click', saveUptimeConfig);
@@ -2283,7 +1963,6 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('btnRefreshMarkets').addEventListener('click', loadMarkets);
   document.getElementById('btnAddMarket').addEventListener('click', addMarket);
   document.getElementById('btnMarketPresets').addEventListener('click', toggleMarketPresets);
-  // Wall tab
   document.getElementById('wallUrlInput').addEventListener('input', e=>onWallUrlInput(e.target.value));
   document.getElementById('btnApplyWallUrl').addEventListener('click', ()=>applyWallUrl());
   document.getElementById('slOpacity').addEventListener('input', e=>onWallSlider('opacity',e.target.value));
@@ -2293,7 +1972,6 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('slGlass').addEventListener('input',   e=>onWallSlider('glass',  e.target.value));
   document.getElementById('btnRemoveWall').addEventListener('click', removeWallpaper);
   document.getElementById('btnResetWall').addEventListener('click',  resetWallSettings);
-  // Font size buttons — event delegation
   document.addEventListener('click', e => {
     const btn = e.target.closest('.font-size-btn');
     if (btn && btn.dataset.size) applyFontSize(btn.dataset.size);
@@ -2304,7 +1982,6 @@ document.addEventListener('DOMContentLoaded', () => {
 //  INIT
 // ════════════════════════════════════════════════
 async function init() {
-  // Migrate old gd_groups format if needed
   const oldGroups = await Store.get('gd_groups', null);
   if (oldGroups && !await Store.get('gd_sections', null)) {
     sections = [{ id:uid(), name:'Main', groups: oldGroups }];
@@ -2339,7 +2016,6 @@ async function init() {
   loadWeather();
 
   const badge=document.getElementById('syncBadge');
-  // Auto-refresh uptime every 60s
   setInterval(() => loadUptime(), 60000);
   if (badge) {
     if (USE_SYNC) { badge.textContent=t.syncActiveMsg; badge.style.color='var(--green)'; badge.style.opacity='1'; setTimeout(()=>badge.style.opacity='0',3500); }
