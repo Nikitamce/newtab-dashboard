@@ -63,22 +63,43 @@ if (USE_SYNC) {
 // ════════════════════════════════════════════════
 //  DATA MODEL
 // ════════════════════════════════════════════════
-const DEFAULT_SECTIONS = [
-  {
-    id: uid(), name: 'Main',
-    groups: [
-      { id: uid(), name: 'Dev', links: [
-        { id: uid(), name: 'GitHub',    url: 'https://github.com' },
-        { id: uid(), name: 'MDN',       url: 'https://developer.mozilla.org' },
-        { id: uid(), name: 'Can I use', url: 'https://caniuse.com' },
-      ]},
-      { id: uid(), name: 'Design', links: [
-        { id: uid(), name: 'Figma',    url: 'https://figma.com' },
-        { id: uid(), name: 'Dribbble', url: 'https://dribbble.com' },
-      ]},
-    ]
+function getBrowserLang() {
+  let lang = '';
+  if (typeof browser !== 'undefined' && browser.i18n && typeof browser.i18n.getUILanguage === 'function') {
+    try { lang = browser.i18n.getUILanguage(); } catch {}
   }
-];
+  if (!lang && typeof navigator !== 'undefined') {
+    lang = navigator.language || (navigator.languages && navigator.languages[0]) || navigator.userLanguage || '';
+  }
+  lang = (lang || '').toLowerCase().split('-')[0].split('_')[0];
+  if (typeof LANGUAGES !== 'undefined' && LANGUAGES[lang]) {
+    return lang;
+  }
+  return 'en';
+}
+
+function getDefaultSections(lang) {
+  const code = lang || getBrowserLang();
+  const isRu = code === 'ru';
+  const isEs = code === 'es';
+  return [
+    {
+      id: uid(), name: isRu ? 'Главная' : isEs ? 'Principal' : 'Main',
+      groups: [
+        { id: uid(), name: isRu ? 'Разработка' : isEs ? 'Desarrollo' : 'Dev', links: [
+          { id: uid(), name: 'GitHub',    url: 'https://github.com' },
+          { id: uid(), name: 'MDN',       url: 'https://developer.mozilla.org' },
+          { id: uid(), name: 'Can I use', url: 'https://caniuse.com' },
+        ]},
+        { id: uid(), name: isRu ? 'Дизайн' : isEs ? 'Diseño' : 'Design', links: [
+          { id: uid(), name: 'Figma',    url: 'https://figma.com' },
+          { id: uid(), name: 'Dribbble', url: 'https://dribbble.com' },
+        ]},
+      ]
+    }
+  ];
+}
+const DEFAULT_SECTIONS = getDefaultSections('en');
 const DEFAULT_FEEDS = [
   { id: uid(), name: 'Hacker News', url: 'https://hnrss.org/frontpage', count: 8 },
   { id: uid(), name: 'Lobste.rs',   url: 'https://lobste.rs/rss',       count: 8 },
@@ -377,8 +398,8 @@ const LANGUAGES = {
   }
 };
 
-let currentLang = 'es';
-let t = LANGUAGES.es;
+let currentLang = 'en';
+let t = LANGUAGES.en;
 
 function getLocale() {
   if (currentLang === 'ru') return 'ru-RU';
@@ -388,7 +409,7 @@ function getLocale() {
 
 function applyLang(langCode, save=true) {
   currentLang = langCode;
-  t = LANGUAGES[langCode] || LANGUAGES.es;
+  t = LANGUAGES[langCode] || LANGUAGES.en;
   if (save) Store.set('gd_lang', langCode);
 
   document.querySelectorAll('[data-i18n]').forEach(el => {
@@ -579,12 +600,25 @@ function renderSections() {
   }
   sections.forEach(sec => {
     const block = document.createElement('div'); block.className = 'section-block';
-    const label = document.createElement('div'); label.className = 'section-label'; label.textContent = sec.name.toUpperCase();
+    const label = document.createElement('div'); label.className = 'section-label';
+    let secName = sec.name;
+    if (secName === 'Main' || secName === 'Principal' || secName === 'Главная' || secName === 'Главное') {
+      secName = currentLang === 'ru' ? 'Главная' : currentLang === 'es' ? 'Principal' : 'Main';
+    }
+    label.textContent = secName.toUpperCase();
     block.appendChild(label);
     const row = document.createElement('div'); row.className = 'groups-row';
     sec.groups.forEach(g => {
       const col = document.createElement('div'); col.className = 'group-col';
-      const name = document.createElement('div'); name.className = 'group-col-name'; name.textContent = g.name;
+      const name = document.createElement('div'); name.className = 'group-col-name';
+      let grpName = g.name;
+      if (grpName === 'Dev' || grpName === 'Desarrollo' || grpName === 'Разработка') {
+        grpName = currentLang === 'ru' ? 'Разработка' : currentLang === 'es' ? 'Desarrollo' : 'Dev';
+      }
+      if (grpName === 'Design' || grpName === 'Diseño' || grpName === 'Дизайн') {
+        grpName = currentLang === 'ru' ? 'Дизайн' : currentLang === 'es' ? 'Diseño' : 'Design';
+      }
+      name.textContent = grpName;
       col.appendChild(name);
       g.links.forEach(l => {
         const a = document.createElement('a'); a.className = 'link-row'; a.href = l.url; a.target = '_blank';
@@ -1982,12 +2016,20 @@ document.addEventListener('DOMContentLoaded', () => {
 //  INIT
 // ════════════════════════════════════════════════
 async function init() {
+  const savedLang = await Store.get('gd_lang', null);
+  const langToUse = savedLang || getBrowserLang();
+  applyLang(langToUse, false);
+
   const oldGroups = await Store.get('gd_groups', null);
   if (oldGroups && !await Store.get('gd_sections', null)) {
     sections = [{ id:uid(), name:'Main', groups: oldGroups }];
     await Store.set('gd_sections', sections);
   } else {
-    sections = await Store.get('gd_sections', DEFAULT_SECTIONS);
+    sections = await Store.get('gd_sections', null);
+    if (!sections) {
+      sections = getDefaultSections(langToUse);
+      await Store.set('gd_sections', sections);
+    }
   }
   feeds       = await Store.get('gd_feeds',    DEFAULT_FEEDS);
   notepad.value = await Store.get('gd_note', '');
@@ -1998,8 +2040,6 @@ async function init() {
   markets  = await Store.get('gd_markets',  DEFAULT_MARKETS);
   const savedEngine = await Store.get('gd_engine', 'google');
   applyEngine(savedEngine);
-  const savedLang = await Store.get('gd_lang', 'es');
-  applyLang(savedLang);
   const savedTheme = await Store.get('gd_theme', 'obsidian');
   applyTheme(savedTheme);
   const savedFont = await Store.get('gd_fontsize', 'md');
