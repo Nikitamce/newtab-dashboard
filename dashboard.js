@@ -219,6 +219,7 @@ const LANGUAGES = {
     videosLabel: 'VÍDEOS',
     days: ['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'],
     months: ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'],
+    monthsGen: ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'],
     monthsShort: ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'],
     dow: ['Lu','Ma','Mi','Ju','Vi','Sá','Do'],
     weatherCodes: {0:'Despejado',1:'Casi despejado',2:'Parcialmente nublado',3:'Nublado',45:'Niebla',48:'Niebla',51:'Llovizna',61:'Lluvia',63:'Lluvia',65:'Lluvia',71:'Nieve',80:'Chubascos',81:'Chubascos',95:'Tormenta'},
@@ -358,6 +359,7 @@ const LANGUAGES = {
     videosLabel: 'ВИДЕО',
     days: ['Воскресенье','Понедельник','Вторник','Среда','Четверг','Пятница','Суббота'],
     months: ['Январь','Февраль','Март','Апрель','Май','Июнь','Июль','Август','Сентябрь','Октябрь','Ноябрь','Декабрь'],
+    monthsGen: ['января','февраля','марта','апреля','мая','июня','июля','августа','сентября','октября','ноября','декабря'],
     monthsShort: ['Янв','Фев','Мар','Апр','Май','Июн','Июл','Авг','Сен','Окт','Ноя','Дек'],
     dow: ['Пн','Вт','Ср','Чт','Пт','Сб','Вс'],
     weatherCodes: {0:'Ясно',1:'Преимущественно ясно',2:'Переменная облачность',3:'Пасмурно',45:'Туман',48:'Туман',51:'Морось',61:'Дождь',63:'Дождь',65:'Дождь',71:'Снег',80:'Ливень',81:'Ливень',95:'Гроза'},
@@ -441,6 +443,7 @@ function applyLang(langCode, save=true) {
 
   document.documentElement.lang = langCode;
 
+  if (typeof tick === 'function') tick();
   if (typeof renderCalendar === 'function') renderCalendar();
   if (typeof renderLangModal === 'function') renderLangModal();
   if (typeof renderThemeModal === 'function') renderThemeModal();
@@ -476,12 +479,17 @@ function tick() {
   const n = new Date();
   const hh = String(n.getHours()).padStart(2,'0');
   const mm = String(n.getMinutes()).padStart(2,'0');
-  document.getElementById('clock').textContent = `${hh}:${mm}`;
-  document.getElementById('dateDay').textContent   = n.getDate();
-  document.getElementById('dateMonth').textContent = t.months[n.getMonth()];
-  document.getElementById('dateWeekday').textContent = t.days[n.getDay()];
+  const clockEl = document.getElementById('clock');
+  if (clockEl) clockEl.textContent = `${hh}:${mm}`;
+  const dayEl = document.getElementById('dateDay');
+  if (dayEl) dayEl.textContent = n.getDate();
+  const monthEl = document.getElementById('dateMonth');
+  if (monthEl) monthEl.textContent = (t.monthsGen && t.monthsGen[n.getMonth()]) || t.months[n.getMonth()];
+  const weekdayEl = document.getElementById('dateWeekday');
+  if (weekdayEl) weekdayEl.textContent = t.days[n.getDay()];
   const h = n.getHours();
-  document.getElementById('greetSub').textContent = h<12 ? t.goodMorning : h<20 ? t.goodAfternoon : t.goodEvening;
+  const greetEl = document.getElementById('greetSub');
+  if (greetEl) greetEl.textContent = h<12 ? t.goodMorning : h<20 ? t.goodAfternoon : t.goodEvening;
 }
 tick(); setInterval(tick, 15000);
 
