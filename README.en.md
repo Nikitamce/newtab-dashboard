@@ -1,4 +1,4 @@
-[🇪🇸 Versión en español](README.md)
+[🇷🇺 Русский](README.ru.md) · [🇬🇧 English](README.en.md) · [🇪🇸 Español](README.md)
 
 # NewTab Dashboard
 
@@ -40,7 +40,7 @@ The dashboard is split into three columns:
 - **Automatic icons** — Links suggest their icon from Simple Icons as you type the name
 - **Customizable wallpaper** — Image URL or preset gradient, with opacity, blur, dim, and tint controls
 - **Import / Export** — Save and restore your full configuration as a JSON file
-- **Multilanguage** — Interface available in Spanish and English
+- **Multilanguage** — Interface available in Spanish, English and Russian
 - **No dependencies** — Vanilla JS, no frameworks or bundler
 
 ---
