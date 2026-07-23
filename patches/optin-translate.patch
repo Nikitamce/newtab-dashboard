@@ -1,0 +1,69 @@
+--- a/dashboard.js
++++ b/dashboard.js
+@@ -148,6 +148,7 @@
+ const DEFAULT_CHANNELS = [];
+ let channels  = DEFAULT_CHANNELS;
+ let uptimeConfig = { url: '', slug: 'default' };
+ let videoCache = {};
++let translateEnabled = false; // OFF by default — only sends titles when user opts in
+ 
+ let markets   = DEFAULT_MARKETS;
+ let sections  = DEFAULT_SECTIONS;
+@@ -280,6 +281,7 @@
+     groups: 'grupos', linksWord: 'links', addGroupBtn: '+ Grupo', addLinkBtn: '+ Link',
+     noBackground: 'Sin fondo', monitorsFound: 'monitores encontrados', weekShort: 'sem',
++    translateNews: 'Traducir títulos de noticias y vídeos',
++    translateNewsHint: '⚠️ Al activarlo, los títulos se envían a Google Translate. Desactivado por defecto por privacidad.',
+   },
+   en: {
+@@ -360,6 +362,7 @@
+     groups: 'groups', linksWord: 'links', addGroupBtn: '+ Group', addLinkBtn: '+ Link',
+     noBackground: 'No background', monitorsFound: 'monitors found', weekShort: 'w',
++    translateNews: 'Translate news and video titles',
++    translateNewsHint: '⚠️ When enabled, titles are sent to Google Translate. Disabled by default for privacy.',
+   },
+   ru: {
+@@ -440,6 +443,7 @@
+     groups: 'групп', linksWord: 'ссылок', addGroupBtn: '+ Группа', addLinkBtn: '+ Ссылка',
+     noBackground: 'Без фона', monitorsFound: 'мониторов найдено', weekShort: 'нед',
++    translateNews: 'Переводить заголовки новостей и видео',
++    translateNewsHint: '⚠️ При включении заголовки отправляются в Google Translate. По умолчанию выключено ради приватности.',
+   }
+ };
+@@ -520,6 +524,18 @@
+     row.addEventListener('click', () => { applyLang(l.code); });
+     list.appendChild(row);
+   });
++
++  // Wire opt-in translation toggle (OFF by default)
++  const toggle = document.getElementById('translateToggle');
++  if (toggle) {
++    toggle.checked = translateEnabled;
++    toggle.onchange = async () => {
++      translateEnabled = toggle.checked;
++      await Store.set('gd_translate', translateEnabled);
++      feedCache = {};
++      videoCache = {};
++      renderFeedTabs();
++      loadVideos(true);
++    };
++  }
+ }
+@@ -580,8 +596,13 @@
+ const translationCache = {};
+ 
+ async function translateFeedItems(items) {
+-  if (!items || !items.length) return;
++  // Privacy: only translate when user explicitly enables it in Language settings
++  if (!translateEnabled || !items || !items.length) {
++    if (items) items.forEach(item => { item.translatedTitle = item.title; });
++    return;
++  }
+   const targetLang = currentLang;
+@@ -1480,6 +1501,7 @@
+   applyFontSize(savedFont);
+   uptimeConfig = await Store.get('gd_uptime', { url: '', slug: 'default' });
+   channels = await Store.get('gd_channels', DEFAULT_CHANNELS);
++  translateEnabled = await Store.get('gd_translate', false);
+   renderAbout();
+   renderCalendar();
