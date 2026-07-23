@@ -61,7 +61,7 @@ if (USE_SYNC) {
 }
 
 // ════════════════════════════════════════════════
-//  DATA MODEL
+//  DATA MODEL — App State
 // ════════════════════════════════════════════════
 function getBrowserLang() {
   let lang = '';
@@ -159,6 +159,7 @@ let wallSettings = { ...DEFAULT_WALL };
 let activeFeedId = null;
 let feedCache    = {};
 
+// Pending state for modal section/group creation
 let pendingSection = null;
 let pendingGroup   = null;
 
@@ -644,43 +645,6 @@ function renderSections() {
 }
 
 // ════════════════════════════════════════════════
-//  TRANSLATION ENGINE FOR FEEDS / NEWS
-// ════════════════════════════════════════════════
-const translationCache = {};
-
-async function translateFeedItems(items) {
-  if (!items || !items.length) return;
-  const targetLang = currentLang;
-  const uncachedItems = items.filter(item => item.title && !translationCache[targetLang + ':' + item.title]);
-
-  if (uncachedItems.length > 0) {
-    try {
-      const titles = uncachedItems.map(item => item.title.replace(/[\r\n]+/g, ' '));
-      const joined = titles.join('\n');
-      const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=${targetLang}&dt=t&q=${encodeURIComponent(joined)}`;
-      const res = await fetch(url, { signal: AbortSignal.timeout(8000) });
-      if (res.ok) {
-        const data = await res.json();
-        if (data && data[0]) {
-          const translatedText = data[0].map(x => x[0]).join('');
-          const lines = translatedText.split('\n');
-          uncachedItems.forEach((item, idx) => {
-            const trans = (lines[idx] || '').trim();
-            translationCache[targetLang + ':' + item.title] = trans || item.title;
-          });
-        }
-      }
-    } catch (e) {
-      console.warn('Feed translation warning:', e);
-    }
-  }
-
-  items.forEach(item => {
-    item.translatedTitle = translationCache[targetLang + ':' + item.title] || item.title;
-  });
-}
-
-// ════════════════════════════════════════════════
 //  RSS FEEDS
 // ════════════════════════════════════════════════
 const RSS_PROXY = 'https://api.rss2json.com/v1/api.json?rss_url=';
@@ -717,7 +681,6 @@ async function renderFeedTabs() {
   }));
 
   const all = results.flat().sort((a, b) => b.pubDate - a.pubDate).slice(0, FEED_MAX);
-  await translateFeedItems(all);
   renderFeedRows(all, content);
 }
 
@@ -732,11 +695,7 @@ function renderFeedRows(items, container) {
       : '';
     const num  = document.createElement('span'); num.className = 'row-num'; num.textContent = String(i+1).padStart(2,'0');
     const body = document.createElement('div'); body.className = 'row-body';
-    const title= document.createElement('div'); title.className = 'row-title';
-    title.textContent = item.translatedTitle || item.title;
-    if (item.translatedTitle && item.translatedTitle !== item.title) {
-      title.title = item.title;
-    }
+    const title= document.createElement('div'); title.className = 'row-title'; title.textContent = item.title;
     const meta = document.createElement('div'); meta.className = 'row-meta';
     meta.textContent = [item.feed, item.domain, pub].filter(Boolean).join(' · ');
     body.appendChild(title); body.appendChild(meta);
@@ -750,7 +709,7 @@ function renderFeedRows(items, container) {
 function refreshFeeds() { feedCache = {}; renderFeedTabs(); }
 
 // ════════════════════════════════════════════════
-//  WEATHER
+//  WEATHER — Open-Meteo API
 // ════════════════════════════════════════════════
 async function loadWeather() {
   try {
@@ -1456,7 +1415,6 @@ async function loadVideos(force=false) {
 
   const results = await Promise.all(fetches);
   const all = results.flat().sort((a, b) => b.pubDate - a.pubDate).map(v => ({ ...v, age: timeAgo(v.pubDate) }));
-  await translateFeedItems(all);
   renderAllVideos(all, el);
 }
 
@@ -1484,11 +1442,7 @@ function renderAllVideos(items, container) {
     const ag = document.createElement('div'); ag.className='video-age';
     ag.textContent = v.age + (v.channel ? ' · ' + v.channel : '');
     wrap.appendChild(ag);
-    const title = document.createElement('div'); title.className='video-title';
-    title.textContent = v.translatedTitle || v.title;
-    if (v.translatedTitle && v.translatedTitle !== v.title) {
-      title.title = v.title;
-    }
+    const title = document.createElement('div'); title.className='video-title'; title.textContent=v.title;
     card.appendChild(wrap); card.appendChild(title);
     row.appendChild(card);
   });
@@ -2111,6 +2065,7 @@ async function init() {
   loadWeather();
 
   const badge=document.getElementById('syncBadge');
+  // Auto-refresh uptime status every 60s
   setInterval(() => loadUptime(), 60000);
   if (badge) {
     if (USE_SYNC) { badge.textContent=t.syncActiveMsg; badge.style.color='var(--green)'; badge.style.opacity='1'; setTimeout(()=>badge.style.opacity='0',3500); }
