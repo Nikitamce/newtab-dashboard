@@ -32,8 +32,6 @@
 
     <div id="syncBadge" class="sync-badge"></div>
 
-
-
     <!-- Feeds in sidebar -->
     <div class="sidebar-feeds">
       <div class="sb-section-title">
@@ -74,8 +72,6 @@
 
     <!-- Link sections rendered by JS -->
     <div id="sectionsEl"></div>
-
-
 
     <!-- Videos section -->
     <div class="videos-section" id="videosSection" style="display:none">
@@ -196,7 +192,6 @@
         <p class="hint-text" data-i18n-html="linksHint"></p>
         <div class="item-list" id="sectionItemList"></div>
         <div class="divider"></div>
-        <!-- Add section -->
         <div class="add-form" id="addSectionForm">
           <div class="add-form-title" data-i18n="newSection"></div>
           <div class="field-row">
@@ -204,7 +199,6 @@
           </div>
           <button class="btn btn-primary btn-sm align-start" id="btnAddSection" data-i18n="createSection"></button>
         </div>
-        <!-- Add group inside section -->
         <div class="add-form" id="addGroupForm" style="display:none">
           <div class="add-form-title"><span data-i18n="newGroupIn"></span> <span id="addGroupSectionName" class="accent-warm"></span></div>
           <div class="field"><label data-i18n="groupName"></label><input id="gName" type="text" data-i18n-placeholder="groupPlaceholder" placeholder="" /></div>
@@ -213,14 +207,12 @@
             <button class="btn btn-ghost btn-sm" id="btnCancelGroup" data-i18n="cancel"></button>
           </div>
         </div>
-        <!-- Add link inside group -->
         <div class="add-form" id="addLinkForm" style="display:none">
           <div class="add-form-title"><span data-i18n="newLinkIn"></span> <span id="addLinkGroupName" class="accent-warm"></span></div>
           <div class="field-row">
             <div class="field"><label data-i18n="name"></label><input id="lName" type="text" placeholder="GitHub" /></div>
             <div class="field"><label>URL</label><input id="lUrl" type="url" placeholder="https://github.com" /></div>
           </div>
-          <!-- Icon picker -->
           <div class="icon-picker-row">
             <div class="icon-preview" id="iconPreview">
               <img id="iconPreviewImg" src="" alt="" />
@@ -238,7 +230,6 @@
             <button class="btn btn-ghost btn-sm" id="btnCloseAddLink" data-i18n="cancel"></button>
           </div>
         </div>
-        <!-- Edit link form -->
         <div class="add-form" id="editLinkForm" style="display:none">
           <div class="add-form-title"><span data-i18n="editLink"></span>: <span id="editLinkGroupName" class="accent-warm"></span></div>
           <div class="field-row">
@@ -353,14 +344,10 @@
         <div class="item-list" id="engineList"></div>
       </div>
 
-      <!-- TAB APARIENCIA (Tema + Fondo + Tipografía) -->
+      <!-- TAB APARIENCIA -->
       <div class="modal-panel" id="tab-appearance">
-
-        <!-- Themes -->
         <div class="appearance-section-title" data-i18n="theme"></div>
         <div class="item-list" id="themeList"></div>
-
-        <!-- Font size -->
         <div class="appearance-section-title" data-i18n="fontSize"></div>
         <div class="font-size-row">
           <button class="font-size-btn" id="btnFontSm" data-size="sm">A<span>sm</span></button>
@@ -368,8 +355,6 @@
           <button class="font-size-btn" id="btnFontLg" data-size="lg">A<span>lg</span></button>
           <button class="font-size-btn" id="btnFontXl" data-size="xl">A<span>xl</span></button>
         </div>
-
-        <!-- Wallpaper -->
         <div class="appearance-section-title" data-i18n="background"></div>
         <div class="wall-preview-wrap">
           <img id="wallPreviewImg" class="wall-preview-img" src="" alt="" />
@@ -424,6 +409,19 @@
       <div class="modal-panel" id="tab-lang">
         <p class="hint-text" data-i18n="langHint"></p>
         <div class="item-list" id="langList"></div>
+
+        <div class="divider"></div>
+
+        <!-- Opt-in translation toggle (OFF by default) -->
+        <div style="padding:4px 0 8px">
+          <label style="display:flex;align-items:flex-start;gap:10px;cursor:pointer;user-select:none">
+            <input type="checkbox" id="translateToggle" style="margin-top:3px;width:16px;height:16px;accent-color:var(--accent-warm);cursor:pointer" />
+            <span>
+              <span style="font-size:13px;color:var(--text-primary);font-weight:500" data-i18n="translateNews"></span>
+              <span class="hint-text" style="display:block;margin-top:4px;margin-bottom:0" data-i18n-html="translateNewsHint"></span>
+            </span>
+          </label>
+        </div>
       </div>
 
       <!-- TAB ACERCA DE -->
